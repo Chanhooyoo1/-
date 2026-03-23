@@ -137,25 +137,15 @@ if search_q:
     # url에 들어갈 때는 공백이 +나 %20으로 변환되어야 안전합니다.
     refined_q = f"{search_q} 주가"
     
-    st.write(f"🚀 **'{refined_q}'** 결과 바로가기:")
+    st.write(f" **'{refined_q}'** 결과 바로가기:")
     
     # 가로로 버튼 3개 배치
-    s_col1, s_col2, s_col3 = st.columns(3)
+    s_col1 = st.columns(1)
     
     with s_col1:
         # 구글: 검색어 뒤에 ' 주가' 포함
         google_url = f"https://www.google.com/search?q={refined_q}"
-        st.link_button("🌐 Google 검색", google_url, use_container_width=True)
-        
-    with s_col2:
-        # 네이버: 검색어 뒤에 ' 주가' 포함
-        naver_url = f"https://search.naver.com/search.naver?query={refined_q}"
-        st.link_button("💚 Naver 검색", naver_url, use_container_width=True)
-        
-    with s_col3:
-        # 다음: 검색어 뒤에 ' 주가' 포함
-        daum_url = f"https://search.daum.net/search?q={refined_q}"
-        st.link_button("💙 Daum 검색", daum_url, use_container_width=True)
+        st.link_button("🌐 Google 검색", google_url, use_container_width=True
 
 st.divider()
 st.caption(f"마지막 업데이트 시각: {datetime.now().strftime('%H:%M:%S')}")
