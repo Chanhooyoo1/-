@@ -150,40 +150,54 @@ st.divider()
 if selected_names:
     cols = st.columns(len(selected_names))
     for i, name in enumerate(selected_names):
+        # 1. 종목 정보 가져오기 (사이드바 stock_dict 기준)
         info = stock_dict[name]
+        ticker_symbol = info["y"] # yfinance용 티커 (예: 005930.KS)
+        
         with cols[i]:
-            if info["type"] == "KR":
-                curr, prev = get_korean_stock_price(info["id"])
-            else:
-                ticker_obj = yf.Ticker(info["id"])
-                hist2d = ticker_obj.history(period="2d")
-                curr = round(hist2d['Close'].iloc[-1], 2) if not hist2d.empty else None
-                prev = round(hist2d['Close'].iloc[-2], 2) if len(hist2d) > 1 else curr
+            # 2. yfinance로 당일 1분 단위 데이터 호출
+            ticker_obj = yf.Ticker(ticker_symbol)
+            # '1d' 기간을 '1m' 간격으로 가져와야 이미지처럼 촘촘한 그래프가 나옵니다.
+            data = ticker_obj.history(period="1d", interval="1m")
             
-            if curr:
+            if not data.empty:
+                curr = data['Close'].iloc[-1]
+                prev = data['Open'].iloc[0] # 당일 시가 대비 변화 확인
                 diff = curr - prev
-                perc = (diff / prev * 100) if prev else 0
-                st.metric(label=name, value=f"{curr:,.2f}", delta=f"{perc:+.2f}%")
+                perc = (diff / prev * 100)
                 
-                # 드라마틱 Plotly 차트
-                chart_data = yf.Ticker(info["y"]).history(period=period_map[selected_period])
-                if not chart_data.empty:
-                    import plotly.graph_objects as go
-                    main_color = "#FF4B4B" if diff >= 0 else "#0072ff"
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(
-                        x=chart_data.index, y=chart_data['Close'],
-                        fill='tozeroy', mode='lines',
-                        line=dict(width=3, color=main_color),
-                        fillcolor=f'rgba({255 if diff >= 0 else 0}, {75 if diff >= 0 else 114}, {75 if diff >= 0 else 255}, 0.1)'
-                    ))
-                    fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=200, template="plotly_dark",
-                                      paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                      xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#333'))
-                    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+                # 상단 메트릭 (상승 시 빨강, 하락 시 파랑)
+                st.metric(label=name, value=f"{curr:,.2f}", delta=f"{perc:+.2f}%")
+
+                # 3. 드라마틱 풀 스팬 차트 생성
+                m_color = "#FF4B4B" if diff >= 0 else "#0072ff"
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=data.index, y=data['Close'],
+                    fill='tozeroy', mode='lines',
+                    line=dict(width=4, color=m_color),
+                    # 아래쪽은 은은한 그라데이션 느낌으로 채움
+                    fillcolor=f'rgba({255 if diff >= 0 else 0}, 75, 255, 0.1)'
+                ))
+
+                # 4. 이미지처럼 폭을 넓게 고정 (장 시작부터 + 6.5시간)
+                start_dt = data.index[0]
+                end_dt = start_dt + pd.Timedelta(hours=6.5) 
+                
+                fig.update_layout(
+                    margin=dict(l=0, r=0, t=10, b=0), height=300,
+                    template="plotly_dark", 
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    xaxis=dict(range=[start_dt, end_dt], showgrid=False, type='date'),
+                    yaxis=dict(showgrid=True, gridcolor='#333', side="right"),
+                    hovermode="x unified"
+                )
+                
+                # 5. 차트 출력 (config로 우측 상단 툴바 숨김)
+                st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
             else:
-                # ← 이 부분의 들여쓰기가 에러의 원인이었습니다!
-                st.error(f"{name} 수신 불가")
+                st.error(f"{name} 데이터를 찾을 수 없습니다. 다시 시도해 주세요.")
 
 st.divider()
 m_col1, m_col2 = st.columns([4, 1])
