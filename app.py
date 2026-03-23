@@ -1,4 +1,3 @@
-import feedparser
 import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
@@ -74,21 +73,6 @@ st.markdown("""
 # 30초 자동 새로고침 설정
 st_autorefresh(interval=30000, key="auto_refresh_key")
 
-import feedparser
-
-def get_stock_news():
-    # 예시: 구글 뉴스 RSS (주식 키워드)
-    rss_url = "https://news.google.com/rss/search?q=주식+시장&hl=ko&gl=KR&ceid=KR:ko"
-    feed = feedparser.parse(rss_url)
-    return feed.entries[:5]  # 최신 뉴스 5개만 반환
-
-with st.sidebar:
-    st.divider()
-    st.subheader("관련 뉴스")
-    news_list = get_stock_news()
-    for entry in news_list:
-        st.markdown(f"**[{entry.title}]({entry.link})**")
-        st.caption(f"{entry.published}")
         # 네이버 금융 크롤링 (User-Agent 헤더 추가로 차단 방지)
         url = f"https://finance.naver.com/item/main.naver?code={ticker}"
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'}
