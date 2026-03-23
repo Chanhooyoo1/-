@@ -242,7 +242,7 @@ if selected_names:
             else:
                 st.error("데이터가 불러와지지 않았어요. 다시 시도해주세요.")
                 # ← 이 부분의 들여쓰기가 에러의 원인이었습니다!
-                st.error(f"{name} 수신 불가")
+                st.error(f"{name} 데이터가 불러와지지 않았어요. 다시 시도해주세요.")
 
 st.divider()
 
