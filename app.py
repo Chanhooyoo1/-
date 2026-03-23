@@ -6,13 +6,69 @@ import requests
 from bs4 import BeautifulSoup
 from streamlit_autorefresh import st_autorefresh
 
-# --- 1. 페이지 설정 ---
-st.set_page_config(page_title="주가분석 일람 시스템", page_icon="📈", layout="wide")
+# --- 1. 페이지 설정 및 디자인 (CSS) ---
+st.set_page_config(page_title="국내-해외 주식 현황 모니터링", page_icon="📈", layout="wide")
 
-# --- 2. 30초 자동 새로고침 ---
-st_autorefresh(interval=30000, key="stock_refresh")
+st.markdown("""
+    <style>
+    /* 폰트 설정 (Pretendard) */
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * { font-family: 'Pretendard', sans-serif; }
+    
+    /* 메인 타이틀 스타일 */
+    .main-title { 
+        font-size: 40px !important; 
+        font-weight: 800; 
+        color: #FFFFFF; 
+        text-align: center; 
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .sub-title { font-size: 18px; color: #888888; text-align: center; font-style: italic; margin-bottom: 30px; }
 
-# --- 3. 데이터 로직 ---
+    /* ★ 버튼 애니메이션 & 그라데이션 그림자 ★ */
+    div.stButton > button {
+        width: 100%;
+        border-radius: 12px;
+        border: none;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+        color: white !important;
+        font-weight: 700;
+        font-size: 16px;
+        box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3); /* 푸른색 그라데이션 그림자 */
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    /* 마우스 올렸을 때 (Hover) */
+    div.stButton > button:hover {
+        transform: translateY(-3px) scale(1.02); /* 살짝 떠오름 */
+        box-shadow: 0 8px 25px rgba(0, 114, 255, 0.5); /* 그림자 강화 */
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    }
+
+    /* 클릭했을 때 (Active) - 쑥 들어가는 효과 */
+    div.stButton > button:active {
+        transform: translateY(1px) scale(0.95); /* 눌림 효과 */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.1s;
+    }
+
+    /* 종목 카드 스타일 개선 */
+    [data-testid="stMetric"] {
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# 30초 자동 새로고침 설정
+st_autorefresh(interval=30000, key="auto_refresh_key")
+
+# --- 2. 데이터 크롤링 함수 ---
 def get_korean_stock_price(ticker):
     try:
         url = f"https://finance.naver.com/item/main.naver?code={ticker}"
@@ -24,29 +80,42 @@ def get_korean_stock_price(ticker):
         return price, yesterday
     except: return None, None
 
-# --- 4. 사이드바 설정 ---
+# --- 3. 사이드바 (설정 메뉴) ---
 with st.sidebar:
-    st.header("⚙️ 모니터링 설정")
+    st.header("모니터링 설정")
     stock_dict = {
-        "삼성전자": {"id": "005930", "type": "KR", "y": "005930.KS"},
-        "현대자동차": {"id": "005380", "type": "KR", "y": "005380.KS"},
-        "알파벳(구글)": {"id": "GOOG", "type": "US", "y": "GOOG"},
-        "맥도날드": {"id": "MCD", "type": "US", "y": "MCD"},
-        "테슬라": {"id": "TSLA", "type": "US", "y": "TSLA"}
+        "삼성전자 (Samsung)": {"id": "005930", "type": "KR", "y": "005930.KS"},
+        "현대자동차 (Hyundai)": {"id": "005380", "type": "KR", "y": "005380.KS"},
+        "알파벳(구글) (GOOG)": {"id": "GOOG", "type": "US", "y": "GOOG"},
+        "맥도날드 (MCD)": {"id": "MCD", "type": "US", "y": "MCD"}
     }
-    selected_names = st.multiselect("종목 선택", list(stock_dict.keys()), default=["삼성전자", "알파벳(구글)"])
-    period_map = {"1일": "1d", "1주일": "7d", "1개월": "1mo", "3개월": "3mo", "1년": "1y"}
-    selected_period = st.selectbox("조회 기간", list(period_map.keys()), index=1)
+    selected_names = st.multiselect("종목 선택", list(stock_dict.keys()))
+    period_map = {"1주일": "7d", "1개월": "1mo", "3개월": "3mo", "1년": "1y"}
+    selected_period = st.selectbox("모니터링 기간", list(period_map.keys()), index=0)
+    
+    st.divider()
+    if st.button("새로고침 (수동)", use_container_width=True):
+        st.rerun()
 
-# --- 5. 메인 화면 ---
-st.title("📈 실시간 주가분석 시스템")
-st.caption(f"🕒 마지막 업데이트: {datetime.now().strftime('%H:%M:%S')} (30초마다 자동 갱신)")
+# --- 4. 메인 화면 구성 ---
+st.markdown('<p class="main-title">주식 추세 일람 그래프</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">𝕽𝖊𝖆𝖑-𝖙𝖎𝖒𝖊 𝕱𝖎𝖓𝖆𝖓𝖈𝖎𝖆𝖑 𝕸𝖔𝖓𝖎𝖙𝖔𝖗𝖎𝖓𝖌 𝕾𝖞𝖘𝖙𝖊𝖒</p>', unsafe_allow_html=True)
 
+# 구글 검색창
+search_q = st.text_input("", placeholder="궁금한 종목의 추세를 찾아보세요!")
+if search_q:
+    st.markdown(f"👉 [구글에서 '{search_q}' 검색 결과 보기](https://www.google.com/search?q={search_q})")
+
+st.divider()
+st.caption(f"마지막 업데이트 시각: {datetime.now().strftime('%H:%M:%S')}")
+
+# 종목 카드 및 그래프 레이아웃
 if selected_names:
     cols = st.columns(len(selected_names))
     for i, name in enumerate(selected_names):
         info = stock_dict[name]
         with cols[i]:
+            # 가격 정보 호출
             if info["type"] == "KR":
                 curr, prev = get_korean_stock_price(info["id"])
             else:
@@ -55,10 +124,27 @@ if selected_names:
                 curr = round(hist2d['Close'].iloc[-1], 2) if not hist2d.empty else None
                 prev = round(hist2d['Close'].iloc[-2], 2) if len(hist2d) > 1 else curr
             
+            # 메트릭 표시
             if curr:
-                st.metric(label=name, value=f"{curr:,.2f}", delta=f"{(curr-prev)/prev*100:+.2f}%")
-                # 그래프 출력
+                diff = curr - prev
+                perc = (diff / prev * 100) if prev else 0
+                st.metric(label=name, value=f"{curr:,.2f}", delta=f"{perc:+.2f}%")
+                
+                # 정밀 그래프 (Area Chart)
                 chart_data = yf.Ticker(info["y"]).history(period=period_map[selected_period])
-                st.area_chart(chart_data['Close'])
+                if not chart_data.empty:
+                    st.area_chart(chart_data['Close'], height=200)
+            else:
+                st.error("데이터가 불러와지지 않았어요. 다시 시도해주세요.")
 
-st.text_area("📝 투자 메모장", placeholder="전략을 기록하세요.")
+st.divider()
+
+# 하단 메모장 및 수동 새로고침
+m_col1, m_col2 = st.columns([4, 1])
+with m_col1:
+    st.text_area("메모장", placeholder="텍스트를 입력하세요...", height=120)
+with m_col2:
+    st.write("") 
+    st.write("") 
+    if st.button("새로고침🔄", use_container_width=True):
+        st.rerun()
