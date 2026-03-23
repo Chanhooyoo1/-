@@ -80,7 +80,7 @@ def get_korean_stock_price(ticker):
         url = f"https://finance.naver.com/item/main.naver?code={ticker}"
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'}
         res = requests.get(url, headers=headers, timeout=10)
-
+        
         if res.status_code == 200:
             soup = BeautifulSoup(res.text, "html.parser")
             # 가격 추출 경로 보강
@@ -91,7 +91,7 @@ def get_korean_stock_price(ticker):
                 # 전일비 계산
                 diff_tag = soup.select_one(".no_exday .ico")
                 diff_val = int(exday.find_all("span")[0].text.replace(',', '')) if exday else 0
-
+                
                 # 상승/하락 여부에 따른 전일가 계산
                 if diff_tag and 'up' in diff_tag.get('class', []):
                     prev = curr - diff_val
@@ -100,13 +100,13 @@ def get_korean_stock_price(ticker):
                 else:
                     prev = curr
                 return curr, prev
-
+        
         # 네이버 실패 시 yfinance로 2차 시도 (안전장치)
         yticker = yf.Ticker(f"{ticker}.KS")
         hist = yticker.history(period="2d")
         if not hist.empty:
             return int(hist['Close'].iloc[-1]), int(hist['Close'].iloc[-2])
-
+            
     except Exception as e:
         print(f"Error: {e}")
     return None, None
@@ -123,25 +123,15 @@ with st.sidebar:
     selected_names = st.multiselect("종목 선택", list(stock_dict.keys()))
     period_map = {"1주일": "7d", "1개월": "1mo", "3개월": "3mo", "1년": "1y"}
     selected_period = st.selectbox("모니터링 기간", list(period_map.keys()), index=0)
-
+    
     st.divider()
     if st.button("새로고침 (수동)", use_container_width=True):
         st.rerun()
 
-# --- 4. 메인 화면 구성 ---
 # --- 4. 메인 화면 --- (이 아래부터 끝까지 덮어쓰세요)
 st.markdown('<p class="main-title">주식 추세 일람 그래프</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">𝕽𝖊𝖆𝖑-𝖙𝖎𝖒𝖊 𝕱𝖎𝖓𝖆𝖓𝖈𝖎𝖆𝖑 𝕸𝖔𝖓𝖎𝖙𝖔𝖗𝖎𝖓𝖌 𝕾𝖞𝖘𝖙𝖊𝖒</p>', unsafe_allow_html=True)
 
-# 구글 검색창
-user_input = st.text_input("종목명 입력") 
-
-if user_input:
-    # 2. 뒤에 공백 하나와 '주가'를 강제로 붙여버립니다.
-    magic_keyword = user_input + " 주가" 
-    
-    # 3. 버튼을 누르면 이 'magic_keyword'가 검색어로 날아갑니다!
-    st.link_button("네이버에서 검색", f"https://search.naver.com/search.naver?query={magic_keyword}")
 # 검색창 섹션
 search_q = st.text_input("", placeholder="알아보고 싶은 종목명을 입력해주세요.")
 if search_q:
@@ -155,99 +145,52 @@ if search_q:
         st.link_button("다음", f"https://search.daum.net/search?q={refined_q}", use_container_width=True)
 
 st.divider()
-st.caption(f"마지막 업데이트 시각: {datetime.now().strftime('%H:%M:%S')}")
 
-if curr:
-                diff = curr - prev
-                perc = (diff / prev * 100) if prev else 0
-                st.metric(label=name, value=f"{curr:,.2f}", delta=f"{perc:+.2f}%")
-                
-                # --- 드라마틱한 Plotly 차트 생성 (오류 수정본) ---
-                chart_data = yf.Ticker(info["y"]).history(period=period_map[selected_period])
-                
-                if not chart_data.empty:
-                    # 상승/하락에 따른 메인 색상 결정 (사용자님의 빨강-보라 테마 반영)
-                    main_color = "#FF4B4B" if diff >= 0 else "#0072ff"
-                    
-                    import plotly.graph_objects as go
-                    fig = go.Figure()
-
-                    # 1. 부드러운 영역 차트 (그라데이션 효과)
-                    fig.add_trace(go.Scatter(
-                        x=chart_data.index, 
-                        y=chart_data['Close'],
-                        fill='tozeroy',
-                        mode='lines',
-                        line=dict(width=3, color=main_color),
-                        # 아래쪽을 투명하게 채움
-                        fillcolor=f'rgba({255 if diff >= 0 else 0}, {75 if diff >= 0 else 114}, {75 if diff >= 0 else 255}, 0.1)',
-                        name="가격"
-                    ))
-
-                    # 2. 레이아웃 설정 (다크모드 & 드라마틱 스타일)
-                    fig.update_layout(
-                        margin=dict(l=0, r=0, t=10, b=0),
-                        height=250,
-                        template="plotly_dark",
-                        paper_bgcolor='rgba(0,0,0,0)',
-                        plot_bgcolor='rgba(0,0,0,0)',
-                        xaxis=dict(showgrid=False),
-                        yaxis=dict(showgrid=True, gridcolor='#333'),
-                        hovermode="x unified"
-                    )
-                    
-                    # ★ 괄호 닫기 완벽 확인 ★
-                    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-            else:
-                st.error(f"{name} 데이터 수신 불가") 
-                                                               
 # 종목 카드 및 그래프 레이아웃
 if selected_names:
-cols = st.columns(len(selected_names))
+    cols = st.columns(len(selected_names))
     for i, name in enumerate(selected_names):
         info = stock_dict[name]
         with cols[i]:
-            # 1. 가격 데이터 가져오기 (들여쓰기 위치 확인!)
-            curr, prev = get_korean_stock_price(info["id"]) if info["type"] == "KR" else (None, None)
-            if not curr:
-                t_obj = yf.Ticker(info["id"])
-                h2d = t_obj.history(period="2d")
-                curr = h2d['Close'].iloc[-1] if not h2d.empty else None
-                prev = h2d['Close'].iloc[-2] if len(h2d) > 1 else curr
-
-            # 2. 데이터가 있을 때 드라마틱 차트 그리기
+            if info["type"] == "KR":
+                curr, prev = get_korean_stock_price(info["id"])
+            else:
+                ticker_obj = yf.Ticker(info["id"])
+                hist2d = ticker_obj.history(period="2d")
+                curr = round(hist2d['Close'].iloc[-1], 2) if not hist2d.empty else None
+                prev = round(hist2d['Close'].iloc[-2], 2) if len(hist2d) > 1 else curr
+            
             if curr:
                 diff = curr - prev
                 perc = (diff / prev * 100) if prev else 0
                 st.metric(label=name, value=f"{curr:,.2f}", delta=f"{perc:+.2f}%")
-
-                # 당일 1분 단위 데이터 (이미지처럼 넓은 폭 구현)
-                chart_data = yf.Ticker(info["y"]).history(period="1d", interval="1m")
                 
+                # 드라마틱 Plotly 차트
+                chart_data = yf.Ticker(info["y"]).history(period=period_map[selected_period])
                 if not chart_data.empty:
-                    m_color = "#FF4B4B" if diff >= 0 else "#0072ff"
+                    import plotly.graph_objects as go
+                    main_color = "#FF4B4B" if diff >= 0 else "#0072ff"
                     fig = go.Figure()
                     fig.add_trace(go.Scatter(
                         x=chart_data.index, y=chart_data['Close'],
                         fill='tozeroy', mode='lines',
-                        line=dict(width=4, color=m_color),
-                        fillcolor=f'rgba({255 if diff >= 0 else 0}, 75, 255, 0.1)'
+                        line=dict(width=3, color=main_color),
+                        fillcolor=f'rgba({255 if diff >= 0 else 0}, {75 if diff >= 0 else 114}, {75 if diff >= 0 else 255}, 0.1)'
                     ))
-
-                    # X축 범위를 넓게 고정 (09:00 ~ 15:30)
-                    start_dt = chart_data.index[0].replace(hour=9, minute=0)
-                    end_dt = chart_data.index[0].replace(hour=15, minute=30)
-                    
-                    fig.update_layout(
-                        margin=dict(l=0, r=0, t=10, b=0), height=300,
-                        template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)',
-                        plot_bgcolor='rgba(0,0,0,0)',
-                        xaxis=dict(range=[start_dt, end_dt], showgrid=False),
-                        yaxis=dict(showgrid=True, gridcolor='#333', side="right"),
-                        hovermode="x unified"
-                    )
+                    fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=200, template="plotly_dark",
+                                      paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                      xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#333'))
                     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-            
-            # 3. 데이터가 없을 때 (여기가 에러 지점! 위 if curr:와 세로줄을 맞춰야 함)
             else:
-                st.error(f"{name} 수신 실패")
+                # ← 이 부분의 들여쓰기가 에러의 원인이었습니다!
+                st.error(f"{name} 수신 불가")
+
+st.divider()
+m_col1, m_col2 = st.columns([4, 1])
+with m_col1:
+    st.text_area("메모장", placeholder="텍스트 입력..", height=120)
+with m_col2:
+    st.write("") 
+    st.write("") 
+    if st.button("새로고침🔄", use_container_width=True):
+        st.rerun()
