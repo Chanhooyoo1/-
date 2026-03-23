@@ -203,12 +203,11 @@ if curr:
                                                                
 # 종목 카드 및 그래프 레이아웃
 if selected_names:
-    cols = st.columns(len(selected_names))
+cols = st.columns(len(selected_names))
     for i, name in enumerate(selected_names):
-        for i, name in enumerate(selected_names):
         info = stock_dict[name]
         with cols[i]:
-            # 1. 가격 데이터 가져오기 (들여쓰기 12칸)
+            # 1. 가격 데이터 가져오기 (들여쓰기 위치 확인!)
             curr, prev = get_korean_stock_price(info["id"]) if info["type"] == "KR" else (None, None)
             if not curr:
                 t_obj = yf.Ticker(info["id"])
@@ -216,12 +215,13 @@ if selected_names:
                 curr = h2d['Close'].iloc[-1] if not h2d.empty else None
                 prev = h2d['Close'].iloc[-2] if len(h2d) > 1 else curr
 
-            # 2. 데이터가 있을 때 차트 그리기 (들여쓰기 12칸)
+            # 2. 데이터가 있을 때 드라마틱 차트 그리기
             if curr:
                 diff = curr - prev
                 perc = (diff / prev * 100) if prev else 0
                 st.metric(label=name, value=f"{curr:,.2f}", delta=f"{perc:+.2f}%")
 
+                # 당일 1분 단위 데이터 (이미지처럼 넓은 폭 구현)
                 chart_data = yf.Ticker(info["y"]).history(period="1d", interval="1m")
                 
                 if not chart_data.empty:
@@ -234,6 +234,7 @@ if selected_names:
                         fillcolor=f'rgba({255 if diff >= 0 else 0}, 75, 255, 0.1)'
                     ))
 
+                    # X축 범위를 넓게 고정 (09:00 ~ 15:30)
                     start_dt = chart_data.index[0].replace(hour=9, minute=0)
                     end_dt = chart_data.index[0].replace(hour=15, minute=30)
                     
@@ -247,6 +248,6 @@ if selected_names:
                     )
                     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
             
-            # 3. 데이터가 없을 때 에러 메시지 (위의 if curr: 와 세로 위치를 똑같이!)
+            # 3. 데이터가 없을 때 (여기가 에러 지점! 위 if curr:와 세로줄을 맞춰야 함)
             else:
                 st.error(f"{name} 수신 실패")
