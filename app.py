@@ -74,7 +74,7 @@ st.markdown("""
 st_autorefresh(interval=30000, key="auto_refresh_key")
 
         # 네이버 금융 크롤링 (User-Agent 헤더 추가로 차단 방지)
-        def get_price(ticker, is_kr=True):
+def get_price(ticker, is_kr=True):
     try:
         if is_kr:
             # 여기 줄의 시작 위치를 확인하세요!
