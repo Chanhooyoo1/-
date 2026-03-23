@@ -74,39 +74,26 @@ st.markdown("""
 st_autorefresh(interval=30000, key="auto_refresh_key")
 
         # 네이버 금융 크롤링 (User-Agent 헤더 추가로 차단 방지)
-        url = f"https://finance.naver.com/item/main.naver?code={ticker}"
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'}
-        res = requests.get(url, headers=headers, timeout=10)
-        
-        if res.status_code == 200:
+        def get_price(ticker, is_kr=True):
+    try:
+        if is_kr:
+            # 여기 줄의 시작 위치를 확인하세요!
+            url = f"https://finance.naver.com/item/main.naver?code={ticker}"
+            res = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
             soup = BeautifulSoup(res.text, "html.parser")
-            # 가격 추출 경로 보강
             price_tag = soup.select_one(".no_today .blind")
             if price_tag:
                 curr = int(price_tag.text.replace(',', ''))
-                exday = soup.select_one(".no_exday .blind")
-                # 전일비 계산
-                diff_tag = soup.select_one(".no_exday .ico")
-                diff_val = int(exday.find_all("span")[0].text.replace(',', '')) if exday else 0
-                
-                # 상승/하락 여부에 따른 전일가 계산
-                if diff_tag and 'up' in diff_tag.get('class', []):
-                    prev = curr - diff_val
-                elif diff_tag and 'down' in diff_tag.get('class', []):
-                    prev = curr + diff_val
-                else:
-                    prev = curr
-                return curr, prev
-        
-        # 네이버 실패 시 yfinance로 2차 시도 (안전장치)
-        yticker = yf.Ticker(f"{ticker}.KS")
-        hist = yticker.history(period="2d")
-        if not hist.empty:
-            return int(hist['Close'].iloc[-1]), int(hist['Close'].iloc[-2])
-            
+                return curr, curr
+            return None, None
+        else:
+            t = yf.Ticker(ticker)
+            h = t.history(period="2d")
+            if not h.empty and len(h) > 1:
+                return h['Close'].iloc[-1], h['Close'].iloc[-2]
+            return None, None
     except Exception as e:
-        print(f"Error: {e}")
-    return None, None
+        return None, None
 
 # --- 3. 사이드바 (설정 메뉴) ---
 with st.sidebar:
