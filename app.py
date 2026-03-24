@@ -7,29 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from streamlit_autorefresh import st_autorefresh
 import feedparser
-import urllib.parse
 
-def get_google_news_rss(keyword):
-    # 한글 키워드의 경우 URL 인코딩이 필요합니다.
-    encoded_keyword = urllib.parse.quote(keyword)
-    
-    # 구글 뉴스 RSS URL (hl=ko는 한국어, gl=KR은 한국 지역 설정)
-    rss_url = f"https://news.google.com/rss/search?q={encoded_keyword}&hl=ko&gl=KR&ceid=KR:ko"
-    
-    # RSS 피드 파싱
-    feed = feedparser.parse(rss_url)
-    
-    print(f"--- '{keyword}' 관련 구글 뉴스 검색 결과 ---")
-    
-    # 뉴스 항목 반복 출력 (최신 5개)
-    for entry in feed.entries[:5]:
-        print(f"제목: {entry.title}")
-        print(f"링크: {entry.link}")
-        print(f"발행일: {entry.published}")
-        print("-" * 30)
-
-if __name__ == "__main__":
-    get_google_news_rss("파이썬 프로그래밍")
 
 # --- 1. 페이지 설정 및 디자인 (CSS) ---
 st.set_page_config(page_title="국내-해외 주식 현황 모니터링", page_icon="📈", layout="wide")
