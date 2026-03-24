@@ -119,6 +119,7 @@ with st.sidebar:
         "현대자동차 (Hyundai)": {"id": "005380", "type": "KR", "y": "005380.KS"},
         "알파벳(구글) (GOOG)": {"id": "GOOG", "type": "US", "y": "GOOG"},
         "맥도날드 (MCD)": {"id": "MCD", "type": "US", "y": "MCD"}
+        "넷플릭스 (NFLX)": {"id": "NFLX", "type": "US", "y": "NFLX"}
     }
     selected_names = st.multiselect("종목 선택", list(stock_dict.keys()))
     period_map = {"1주일": "7d", "1개월": "1mo", "3개월": "3mo", "1년": "1y"}
