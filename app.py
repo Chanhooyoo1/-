@@ -44,7 +44,7 @@ def get_google_stock_news(limit=10):
             if " By " in title:
                 title = title.split(" By ")[0]
             elif " by " in title:
-                title = title.split(" [ ")[0]
+                title = title.split(" by ")[0] # 기존 코드의 [ 오타 수정 및 로직 유지
             
             # 3. 양옆 공백 제거 후 저장
             results.append({
@@ -63,17 +63,17 @@ st.markdown("""
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
     * { font-family: 'Pretendard', sans-serif; }
     
-    /* 🔥 [메인 제목 화려하게] 🔥 */
+    /* 🔥 [메인 제목 화려하게 - 찬후님 요청 사양] 🔥 */
     .main-title {
         font-size: 40px !important;    /* 크기 40 */
-        font-weight: 900 !important;   /* 볼드 (가장 두껍게) */
+        font-weight: 900 !important;   /* 볼드 */
         
         /* ✨ 그라데이션 (빨강 -> 보라) */
         background: linear-gradient(135deg, #FF4B4B, #764BA2);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         
-        /* 🌑 그림자 (네온 느낌 살짝) */
+        /* 🌑 그림자 */
         text-shadow: 2px 2px 8px rgba(255, 75, 75, 0.4);
         
         text-align: center;
@@ -87,7 +87,7 @@ st.markdown("""
         color: #888888 !important;     /* 회색 */
         text-align: center;
         margin-bottom: 35px;
-        letter-spacing: 1px;           /* 자간 살짝 넓힘 */
+        letter-spacing: 1px;
     }
     
     div.stButton > button {
@@ -100,12 +100,10 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# 온리원 호출로 중복 에러 방지
 st_autorefresh(interval=60000, key="final_refresh_timer")
 
-# 온리원호출!!!!
-st_autorefresh(interval=60000, key="final_refresh_timer")
-
-#3. 사이드바 종목 목록
+# 3. 사이드바 종목 목록
 with st.sidebar:
     st.header("📊 설정")
     stock_dict = {
@@ -117,7 +115,6 @@ with st.sidebar:
         "LG전자": {"id": "066570", "y": "066570.KS"},
         "넷플릭스 (NFLX)": {"id": "NFLX", "y": "NFLX"},
         "맥도날드": {"id": "MCD", "y": "MCD"}
-        
     }
     
     selected_names = st.multiselect(
@@ -132,7 +129,6 @@ with st.sidebar:
 
     st.divider()
     st.subheader("📰 오늘의 주식 관련 뉴스")
-    # 구글 뉴스
     news_data = get_google_stock_news(6)
     if news_data:
         for news in news_data:
@@ -140,7 +136,7 @@ with st.sidebar:
     else:
         st.info("뉴스를 로딩 중이거나 가져올 수 없습니다.")
 
-# 메인
+# 메인 화면
 st.markdown('<p class="main-title">주식 추세 일람 그래프</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">𝕽𝖊𝖆𝖑-𝖙𝖎𝖒𝖊 𝕱𝖎𝖓𝖆𝖓𝖈𝖎𝖆𝖑 𝕸𝖔𝖓𝖎𝖙𝖔𝖗𝖎𝖓𝖌 𝕾𝖞𝖘𝖙𝖊𝖒</p>', unsafe_allow_html=True)
 
@@ -171,7 +167,7 @@ if selected_names:
                     perc = (curr_val - prev_close) / prev_close * 100
                     st.metric(label=name, value=f"${curr_val:,.2f}", delta=f"{perc:+.2f}%")
 
-            # 그래프 경고
+            # 그래프 경고 수정
             df = yf.Ticker(info["y"]).history(period="1d", interval="1m")
             if not df.empty:
                 fig = go.Figure(go.Scatter(x=df.index, y=df['Close'], fill='tozeroy', mode='lines', line=dict(color="#FF4B4B")))
