@@ -73,13 +73,13 @@ with st.sidebar:
     st.header("⚙ 종목ㆍ기간 설정")
     stock_dict = {
         "삼성전자 (Samsung)": {"id": "005930", "y": "005930.KS"},
+        "현대자동차 (Hyundai)": {"id": "005380", "y": "005380.KS"},
         "SK 하이닉스 (Hynix)": {"id": "000660", "y": "000660.KS"},
-        "엔비디아 (NVDA)": {"id": "NVDA", "y": "NVDA"}
+        "엔비디아 (NVDA)": {"id": "NVDA", "y": "NVDA"},
         "알파벳(구글) (GOOG)": {"id": "GOOG", "y": "GOOG"},
         "LG전자": {"id": "066570", "y": "066570.KS"},
-        "맥도날드": {"id": "MCD", "y": "MCD"},
         "넷플릭스 (NFLX)": {"id": "NFLX", "y": "NFLX"},
-        "현대자동차": {"id": "005380", "y": "005380.KS"}
+        "맥도날드": {"id": "MCD", "y": "MCD"}
 
     }
     selected_names = st.multiselect("종목 선택", options=list(stock_dict.keys()), default=["삼성전자 (Samsung)"])
