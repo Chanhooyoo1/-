@@ -4,7 +4,6 @@ import yfinance as yf
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-import feedparser
 from streamlit_autorefresh import st_autorefresh
 
 # --- [1. 엔진 함수 정의] ---
@@ -27,15 +26,29 @@ def get_naver_stock(code):
         return {'curr': curr_price, 'perc': perc}
     except: return None
 
-def get_stock_news(limit=6):
-    """주식/경제 전문 뉴스 RSS"""
-    rss_url = "https://www.mk.co.kr/rss/30200001/"
+def get_naver_news_search(limit=6):
+    """네이버 뉴스에서 '주식' 키워드로 최신 뉴스 검색 결과 가져오기"""
+    # '주식' 키워드 + 최신순(sort=1) 정렬 주소입니다.
+    url = "https://search.naver.com/search.naver?where=news&query=주식&sm=tab_pge&sort=1"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
     try:
-        feed = feedparser.parse(rss_url)
-        if not feed.entries:
-            return []
-        return [{"title": entry.title, "link": entry.link} for entry in feed.entries[:limit]]
-    except: return []
+        res = requests.get(url, headers=headers, timeout=5)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        # 네이버 뉴스 검색 결과의 제목 태그 선택자입니다.
+        news_items = soup.select(".news_tit")
+        
+        results = []
+        for item in news_items[:limit]:
+            results.append({
+                "title": item.get("title"),
+                "link": item.get("href")
+            })
+        return results
+    except Exception as e:
+        print(f"뉴스 로딩에 실패했어요. 나중에 다시 시도해주세요.: {e}")
+        return []
 
 # --- [2. 페이지 설정 및 디자인] ---
 st.set_page_config(page_title="주식 실시간 모니터링", page_icon="📈", layout="wide")
@@ -57,17 +70,20 @@ st.markdown("""
 
 st_autorefresh(interval=60000, key="auto_refresh")
 
-# --- [3. 사이드바 (종목 리스트 원복)] ---
+# --- [3. 사이드바] ---
 with st.sidebar:
     st.header("📊 설정")
-    # 원래 요청하셨던 종목 리스트로 구성했습니다.
     stock_dict = {
         "삼성전자 (Samsung)": {"id": "005930", "y": "005930.KS"},
         "현대자동차 (Hyundai)": {"id": "005380", "y": "005380.KS"},
         "SK 하이닉스 (Hynix)": {"id": "000660", "y": "000660.KS"},
         "엔비디아 (NVDA)": {"id": "NVDA", "y": "NVDA"},
         "알파벳(구글) (GOOG)": {"id": "GOOG", "y": "GOOG"},
-        "애플 (AAPL)": {"id": "AAPL", "y": "AAPL"}
+        "LG전자": {"id": "066570", "y": "066570.KS"},
+        "넷플릭스 (NFLX)": {"id": "NFLX", "y": "NFLX"},
+        "맥도날드": {"id": "MCD", "y": "MCD"}
+        
+        
     }
     
     selected_names = st.multiselect(
@@ -77,20 +93,21 @@ with st.sidebar:
     )
     
     st.divider()
-    # 알림 설정 부분은 요청대로 제거했습니다.
 
     if st.button("새로고침", width='stretch', key="sidebar_btn"):
         st.rerun()
 
     st.divider()
-    st.subheader("📰 주식 뉴스")
-    news_data = get_stock_news(6)
+    st.subheader("📰 네이버 주식 뉴스")
+    # RSS 대신 네이버 검색 함수 사용
+    news_data = get_naver_news_search(6)
+    
     if news_data:
         for news in news_data:
             short_t = news["title"][:22] + ".." if len(news["title"]) > 22 else news["title"]
-            st.markdown(f'<div class="news-item">· <a class="news-link" href="{news["link"]}" target="_blank">{short_t}</a></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="news-item">· <a class="news-link" href="{news["link"]}" target="_blank" title="{news["title"]}">{short_t}</a></div>', unsafe_allow_html=True)
     else:
-        st.info("뉴스를 가져올 수 없습니다.")
+        st.info("네이버 뉴스를 가져올 수 없습니다.")
 
 # --- [4. 메인 화면] ---
 st.markdown('<p class="main-title">실시간 주식 대시보드</p>', unsafe_allow_html=True)
@@ -109,7 +126,6 @@ if selected_names:
     for i, name in enumerate(selected_names):
         info = stock_dict[name]
         with cols[i]:
-            # 주가 수집
             if info["id"].isdigit(): # 국내주식
                 res = get_naver_stock(info["id"])
                 if res:
@@ -119,12 +135,10 @@ if selected_names:
                 y_hist = y_ticker.history(period="1d")
                 if not y_hist.empty:
                     curr_val = y_hist['Close'].iloc[-1]
-                    # 이전 종가 대비 등락률 계산
                     prev_close = y_ticker.info.get('regularMarketPreviousClose', curr_val)
                     perc = (curr_val - prev_close) / prev_close * 100
                     st.metric(label=name, value=f"${curr_val:,.2f}", delta=f"{perc:+.2f}%")
 
-            # 그래프
             df = yf.Ticker(info["y"]).history(period="1d", interval="1m")
             if not df.empty:
                 fig = go.Figure(go.Scatter(x=df.index, y=df['Close'], fill='tozeroy', mode='lines', line=dict(color="#FF4B4B")))
