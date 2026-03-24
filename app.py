@@ -33,7 +33,7 @@ def get_google_stock_news(limit=6):
         results = []
         for entry in feed.entries[:limit]:
             # 언론사 부분 삭제
-            clean_title = entry.title.rsplit(" by ", 1)[0] 
+            clean_title = entry.title.rsplit(" By ", 1)[0] 
             
             results.append({
                 "title": clean_title, 
