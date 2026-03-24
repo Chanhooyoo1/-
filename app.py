@@ -44,7 +44,7 @@ def get_google_stock_news(limit=6):
             if " By " in title:
                 title = title.split(" By ")[0]
             elif " by " in title:
-                title = title.split(" by ")[0]
+                title = title.split(" [ ")[0]
             
             # 3. 양옆 공백 제거 후 저장
             results.append({
