@@ -132,7 +132,7 @@ if selected_names:
             fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.05, row_width=[0.2, 0.8])
             
             # 캔들 & 이평선
-            fig.add_trace(go.Candlestick(x=df.index, open=df['열림'], high=df['높음!'], low=df['낮음..'], close=df['닫힘'], name='Price', increasing_line_color='#FF4B4B', decreasing_line_color='#0083B0'), row=1, col=1)
+            fig.add_trace(go.Candlestick(x=df.index, open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], name='Price', increasing_line_color='#FF4B4B', decreasing_line_color='#0083B0'), row=1, col=1)
             fig.add_trace(go.Scatter(x=df.index, y=df['5일 이동평균선'], name='MA5', line=dict(color='#FFEE00', width=1.2)), row=1, col=1)
             fig.add_trace(go.Scatter(x=df.index, y=df['20일 이동평균선'], name='MA20', line=dict(color='#FF00FF', width=1.2)), row=1, col=1)
             fig.add_trace(go.Scatter(x=df.index, y=df['60일 이동평균선'], name='MA60', line=dict(color='#00FF00', width=1.2)), row=1, col=1)
