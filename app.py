@@ -7,8 +7,31 @@ import requests
 from bs4 import BeautifulSoup
 from streamlit_autorefresh import st_autorefresh
 import feedparser
+import requests
+# 1. 아까 찾은 주소
+url = "https://api.soopeh.com/economy/stocks/quotes"
+params = {"symbols": "NVDA"}
 
+# 2. 복사하신 헤더 정보를 그대로 파이썬 형식으로 변환
+headers = {
+    "accept": "*/*",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    # 가장 중요한 쿠키 열쇠!
+    "cookie": "_ga=GA1.1.836760262.1774343435; soopeh_refresh=n5p-oerNH3xDM39-WLsEjLpLoFp6NARoKLshl5TW5KU_hr9FckY0E5w-ULvrF_zj; soopeh_auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZmY0MjNmNS1iY2JlLTQzYWMtODFmNy1jOWUwYzg1YjdlMmUiLCJlbWFpbCI6bnVsbCwibG9naW5JZCI6InlkNjAxMDYiLCJuaWNrbmFtZSI6IuycoOywrO2bhCIsInJvbGUiOiJTVFVERU5UIiwidG9rZW5WZXJzaW9uIjozLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJwYXNzd29yZENoYW5nZVJlcXVpcmVkIjpmYWxzZSwiaWF0IjoxNzc0MzQ2MzA0LCJleHAiOjE3NzQzNDcyMDR9.Dd59MK6rvsCsms6OGXOXrDd0C50L0ln4lKJeYSjXncQ; soopeh_csrf_v2=oIBBbLImBKAQcXYuc7IFLFIoRY1JT-GU",
+    "origin": "https://www.soopeh.com",
+    "referer": "https://www.soopeh.com/",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+}
 
+response = requests.get(url, params=params, headers=headers)
+
+if response.status_code == 200:
+    data = response.json()
+    print("--- 수페 엔비디아 데이터 ---")
+    print(data)
+else:
+    print(f"데이터를 가져오지 못했습니다. 에러 코드: {response.status_code}")
 # --- 1. 페이지 설정 및 디자인 (CSS) ---
 st.set_page_config(page_title="국내-해외 주식 현황 모니터링", page_icon="📈", layout="wide")
 
