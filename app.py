@@ -6,26 +6,41 @@ from streamlit_autorefresh import st_autorefresh
 
 # --- [1. 수페 로그인 & 쿠키 획득 함수 (No Selenium 방식)] ---
 def login_to_soopeh(user_id, user_pw):
-    """Selenium 없이 HTTP 요청만으로 로그인을 시도합니다."""
-    login_url = "https://api.soopeh.com/auth/login" # 수페 실제 로그인 API 주소 (확인 필요)
-    payload = {
-        "identifier": user_id,
-        "password": user_pw
-    }
+    """더 강력한 '사람 흉내' 헤더를 추가한 로그인 함수"""
+    login_url = "https://www.soopeh.com/api/auth/login" # 실제 API 주소로 정밀 조정
+    
+    # 서버를 속이기 위한 '진짜 브라우저' 정보
     headers = {
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36...",
-        "content-type": "application/json"
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+        "content-type": "application/json",
+        "origin": "https://www.soopeh.com",
+        "referer": "https://www.soopeh.com/login",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    }
+    
+    # 수페가 사용하는 정확한 데이터 필드명 (identifier vs username)
+    payload = {
+        "identifier": user_id, 
+        "password": user_pw
     }
     
     try:
-        response = requests.post(login_url, json=payload, headers=headers, timeout=10)
+        # 세션을 유지하며 로그인 시도
+        session = requests.Session()
+        response = session.post(login_url, json=payload, headers=headers, timeout=10)
+        
         if response.status_code == 200:
-            # 로그인 성공 시 서버가 주는 쿠키를 세션에 저장
-            cookies = response.cookies.get_dict()
-            cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+            # 로그인 성공 시 모든 쿠키를 싹 긁어옴
+            all_cookies = session.cookies.get_dict()
+            cookie_str = "; ".join([f"{k}={v}" for k, v in all_cookies.items()])
             return cookie_str
-        return None
-    except:
+        else:
+            # 실패 시 서버가 보낸 에러 메시지를 터미널에 출력 (디버깅용)
+            print(f"로그인 실패 원인: {response.text}")
+            return None
+    except Exception as e:
+        print(f"네트워크 오류: {e}")
         return None
 
 # --- [2. 메인 UI 설정] ---
