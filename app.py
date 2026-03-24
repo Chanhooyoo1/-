@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import feedparser
 from streamlit_autorefresh import st_autorefresh
 
-# --- [1. 엔진 함수 정의] ---
+# 기사 가져오는 엔진
 def get_naver_stock(code):
     url = f"https://finance.naver.com/item/main.naver?code={code}"
     try:
@@ -39,36 +39,67 @@ def get_google_stock_news(limit=10):
         return results
     except: return []
 
-# --- [2. 페이지 설정 및 디자인] ---
+# 페이지 디자인, 설정
 st.set_page_config(page_title="주식 실시간 모니터링 시스템", page_icon="📈", layout="wide")
 
 st.markdown("""
     <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
     * { font-family: 'Pretendard', sans-serif; }
+    
+    /* 메인 타이틀 */
     .main-title {
         font-size: 40px !important; font-weight: 900 !important;
         background: linear-gradient(135deg, #FF4B4B, #764BA2);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         text-shadow: 2px 2px 8px rgba(255, 75, 75, 0.4); text-align: center; margin-bottom: 5px;
     }
+    
+    /* 서브 타이틀 */
     .sub-title {
         font-size: 14px !important; font-weight: 400 !important; color: #888888 !important;
         text-align: center; margin-bottom: 35px; letter-spacing: 1px;
     }
+    
+    /* 일반 버튼 스타일 */
     div.stButton > button {
         width: 100%; border-radius: 10px; background: linear-gradient(135deg, #FF4B4B, #764BA2);
         color: white !important; font-weight: 700; border: none; padding: 10px;
     }
+    
+    /* 메트릭(가격표) 박스 */
     [data-testid="stMetric"] { background-color: #1e1e1e; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+    
+    /* 뉴스 리스트 스타일 */
     .news-item { font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
     .news-link { color: #FF4B4B; text-decoration: none; font-weight: 500; }
+
+    /* 🔥 [추가] 모바일 사이드바 열기 버튼(삼선메뉴) 크게 만들기 */
+    button[data-testid="stSidebarCollapseButton"] {
+        width: 55px !important;
+        height: 55px !important;
+        background-color: rgba(255, 75, 75, 0.15) !important; /* 살짝 붉은 배경으로 강조 */
+        border-radius: 12px !important;
+        margin-top: 5px !important;
+    }
+
+    /* 버튼 안의 아이콘(☰) 크기 및 색상 */
+    button[data-testid="stSidebarCollapseButton"] svg {
+        width: 32px !important;
+        height: 32px !important;
+        fill: #FF4B4B !important;
+    }
+
+    /* 사이드바 안의 닫기 버튼(X)도 누르기 편하게 조절 */
+    button[data-testid="stSidebarCloseButton"] {
+        width: 45px !important;
+        height: 45px !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
 st_autorefresh(interval=60000, key="final_refresh_timer")
-
-# --- [3. 사이드바 설정] ---
+# 3. 사이드바
 with st.sidebar:
     st.header("⚙ 종목ㆍ기간 설정")
     stock_dict = {
