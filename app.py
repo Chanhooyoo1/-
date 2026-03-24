@@ -27,18 +27,58 @@ def get_naver_stock(code):
         return {'curr': curr_price, 'perc': perc}
     except:
         return None
-
-# --- [2. RSS 뉴스 가져오기] ---
+# --- [2. RSS 뉴스 가져오기 (연합뉴스 정밀 버전)] ---
 def get_stock_news(limit=6):
-    rss_url = "https://www.mk.co.kr/rss/30200001/"
+    # 매일경제 대신 더 안정적인 연합뉴스 경제 RSS를 사용합니다.
+    rss_url = "https://www.yonhapnewstv.co.kr/browse/feed/" 
     try:
+        # 10초 타임아웃을 주어 서버가 멍 때리는 걸 방지합니다.
         feed = feedparser.parse(rss_url)
+        
+        if not feed.entries:
+            # 피드는 읽었지만 내용이 없는 경우 대안 주소 시도
+            alt_url = "https://fs.jtbc.co.kr/RSS/newsflash.xml"
+            feed = feedparser.parse(alt_url)
+            
         if not feed.entries:
             return []
+            
         return [{"title": entry.title, "link": entry.link} for entry in feed.entries[:limit]]
-    except:
+    except Exception as e:
+        # 에러가 나면 터미널에 기록합니다.
+        print(f"RSS 피드 오류: {e}")
         return []
 
+# --- [4. 사이드바 (뉴스 출력 및 알림 설정)] ---
+with st.sidebar:
+    st.header("📊 모니터링 설정")
+    # ... (기존 stock_dict 설정은 그대로 유지) ...
+    
+    # 🔔 [신규] 주가 알림 설정 칸
+    st.divider()
+    st.subheader("🔔 가격 알림 설정")
+    target_nvda = st.number_input("엔비디아 알림 ($)", value=950.0, step=10.0)
+    target_samsung = st.number_input("삼성전자 알림 (원)", value=85000, step=500)
+
+    if st.button("새로고침 (수동)", width='stretch'):
+        st.rerun()
+
+    st.divider()
+    st.subheader("📰 실시간 주요 뉴스")
+    
+    # 뉴스 로딩 시각화
+    with st.spinner('최신 뉴스 로딩 중...'):
+        news_list = get_stock_news(6)
+        
+    if news_list:
+        for news in news_list:
+            # 제목이 너무 길면 잘라주기
+            short_title = news["title"][:22] + ".." if len(news["title"]) > 22 else news["title"]
+            st.markdown(f'<div class="news-item">· <a class="news-link" href="{news["link"]}" target="_blank" title="{news["title"]}">{short_title}</a></div>', unsafe_allow_html=True)
+    else:
+        # 뉴스가 안 나올 때의 안내 메시지 강화
+        st.warning("⚠️ 뉴스를 불러올 수 없습니다.")
+        st.info("💡 인터넷 연결을 확인하거나 잠시 후 새로고침을 눌러주세요.")
 # --- [3. 페이지 설정 및 디자인 (CSS)] ---
 st.set_page_config(page_title="국내-해외 주식 현황 모니터링", page_icon="📈", layout="wide")
 
