@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
-import pandas as pd
+import pandas as p
 import requests
 from bs4 import BeautifulSoup
 import feedparser
@@ -27,11 +27,21 @@ def get_naver_stock(code):
         return {'curr': curr_price, 'perc': perc}
     except: return None
 
-# --- [2. RSS 뉴스 (사이드바용)] ---
+# --- [2. RSS 뉴스 (에러 방지 강화 버전)] ---
 def get_stock_news(limit=6):
-    rss_url = "https://www.mk.co.kr/rss/30200001/"
-    feed = feedparser.parse(rss_url)
-    return [{"title": entry.title, "link": entry.link} for entry in feed.entries[:limit]]
+    # 매일경제 RSS (만약 이게 안 되면 아래 주석의 연합뉴스로 바꿔보세요)
+    rss_url = "https://www.mk.co.kr/rss/30200001/" 
+    # rss_url = "https://www.yonhapnewstv.co.kr/browse/feed/" # 연합뉴스 TV (대안)
+    
+    try:
+        feed = feedparser.parse(rss_url)
+        # 피드가 비어있거나 에러가 났을 때 처리
+        if not feed.entries:
+            return []
+        return [{"title": entry.title, "link": entry.link} for entry in feed.entries[:limit]]
+    except Exception as e:
+        print(f"RSS Error: {e}")
+        return []
 
 # --- [3. 디자인 설정 (찬후님 원본 CSS 100% 복사)] ---
 st.set_page_config(page_title="국내-해외 주식 현황 모니터링", page_icon="📈", layout="wide")
@@ -94,15 +104,19 @@ with st.sidebar:
     }
     selected_names = st.multiselect("종목 선택", list(stock_dict.keys()), default=["엔비디아 (NVDA)", "삼성전자 (Samsung)"])
     
-    st.divider()
-    if st.button("새로고침 (수동)", use_container_width=True):
-        st.rerun()
-
-    st.divider()
+st.divider()
     st.subheader("📰 실시간 주요 뉴스")
-    news_list = get_stock_news(6)
-    for news in news_list:
-        st.markdown(f'<div class="news-item">· <a class="news-link" href="{news["link"]}" target="_blank">{news["title"]}</a></div>', unsafe_allow_html=True)
+    
+    with st.spinner('뉴스를 불러오는 중...'):
+        news_list = get_stock_news(6)
+        
+    if news_list:
+        for news in news_list:
+            # 뉴스 제목이 너무 길면 잘라주는 센스!
+            display_title = news["title"][:30] + "..." if len(news["title"]) > 30 else news["title"]
+            st.markdown(f'<div class="news-item">· <a class="news-link" href="{news["link"]}" target="_blank" title="{news["title"]}">{display_title}</a></div>', unsafe_allow_html=True)
+    else:
+        st.info("현재 뉴스를 가져올 수 없습니다. 잠시 후 다시 시도해주세요.")
 
 # --- [5. 메인 화면 (레이아웃 완벽 복구)] ---
 st.markdown('<p class="main-title">주식 추세 일람 그래프</p>', unsafe_allow_html=True)
@@ -152,3 +166,4 @@ with m_col2:
     st.write("") 
     st.write("") 
     if st.button("새로고침🔄", use_container_width=True): st.rerun()
+        
