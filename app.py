@@ -4,13 +4,11 @@ import yfinance as yf
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-import feedparser # 구글 뉴스를 위해 필요합니다
+import feedparser
 from streamlit_autorefresh import st_autorefresh
 
-# --- [1. 엔진 함수 정의] ---
-
+# 1.신문 기사 크롤링 엔진
 def get_naver_stock(code):
-    """국내 주가 크롤링"""
     url = f"https://finance.naver.com/item/main.naver?code={code}"
     try:
         res = requests.get(url, timeout=5)
@@ -28,20 +26,24 @@ def get_naver_stock(code):
     except: return None
 
 def get_google_stock_news(limit=6):
-    """네이버 대신 차단이 없는 구글 뉴스를 통해 '주식' 뉴스 가져오기"""
-    # 구글 뉴스 RSS는 서버에서도 차단 없이 아주 잘 작동합니다.
+    """구글 뉴스 RSS에서 제목 뒤의 출처(언론사명)를 제거하고 가져오기"""
     rss_url = "https://news.google.com/rss/search?q=주식&hl=ko&gl=KR&ceid=KR:ko"
     try:
         feed = feedparser.parse(rss_url)
-        # 구글 뉴스 제목 뒤에 붙는 언론사 이름 제거하고 깔끔하게 정리
         results = []
         for entry in feed.entries[:limit]:
-            clean_title = entry.title.split(" - ")[0]
-            results.append({"title": clean_title, "link": entry.link})
+            # 언론사 부분 삭제
+            clean_title = entry.title.rsplit(" - ", 1)[0] 
+            
+            results.append({
+                "title": clean_title, 
+                "link": entry.link
+            })
         return results
-    except: return []
+    except:
+        return []
 
-# --- [2. 페이지 설정 및 디자인] ---
+# 2. 페이지 디자인
 st.set_page_config(page_title="주식 실시간 모니터링", page_icon="📈", layout="wide")
 
 st.markdown("""
@@ -59,10 +61,10 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# ⚠️ 중복 방지: 이 코드는 파일 안에서 딱 한 번만 호출되어야 합니다.
+# 온리원호출!!!!
 st_autorefresh(interval=60000, key="final_refresh_timer")
 
-# --- [3. 사이드바] ---
+#3. 사이드바
 with st.sidebar:
     st.header("📊 설정")
     stock_dict = {
@@ -71,13 +73,16 @@ with st.sidebar:
         "SK 하이닉스 (Hynix)": {"id": "000660", "y": "000660.KS"},
         "엔비디아 (NVDA)": {"id": "NVDA", "y": "NVDA"},
         "알파벳(구글) (GOOG)": {"id": "GOOG", "y": "GOOG"},
-        "애플 (AAPL)": {"id": "AAPL", "y": "AAPL"}
+        "LG전자": {"id": "066570", "y": "066570.KS"},
+        "넷플릭스 (NFLX)": {"id": "NFLX", "y": "NFLX"},
+        "맥도날드": {"id": "MCD", "y": "MCD"}
+        
     }
     
     selected_names = st.multiselect(
         "종목 선택", 
         options=list(stock_dict.keys()), 
-        default=["엔비디아 (NVDA)", "삼성전자 (Samsung)"]
+        default=["삼성전자 (Samsung)"]
     )
     
     st.divider()
@@ -85,8 +90,8 @@ with st.sidebar:
         st.rerun()
 
     st.divider()
-    st.subheader("📰 오늘의 주요 뉴스")
-    # 네이버 대신 더 확실한 구글 뉴스로 가져옵니다.
+    st.subheader("📰 오늘의 주식 관련 뉴스")
+    # 구글 뉴스
     news_data = get_google_stock_news(6)
     if news_data:
         for news in news_data:
