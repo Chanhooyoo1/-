@@ -62,16 +62,45 @@ st.markdown("""
     <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
     * { font-family: 'Pretendard', sans-serif; }
-    .main-title { font-size: 35px; font-weight: 800; color: white; text-align: center; margin-bottom: 20px; }
+    
+    /* 🔥 [메인 제목 화려하게] 🔥 */
+    .main-title {
+        font-size: 40px !important;    /* 크기 40 */
+        font-weight: 900 !important;   /* 볼드 (가장 두껍게) */
+        
+        /* ✨ 그라데이션 (빨강 -> 보라) */
+        background: linear-gradient(135deg, #FF4B4B, #764BA2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        
+        /* 🌑 그림자 (네온 느낌 살짝) */
+        text-shadow: 2px 2px 8px rgba(255, 75, 75, 0.4);
+        
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    
+    /* 🌑 [부제목 심플하게] 🌑 */
+    .sub-title {
+        font-size: 14px !important;    /* 작게 */
+        font-weight: 400 !important;   /* 얇게 */
+        color: #888888 !important;     /* 회색 */
+        text-align: center;
+        margin-bottom: 35px;
+        letter-spacing: 1px;           /* 자간 살짝 넓힘 */
+    }
+    
     div.stButton > button {
         width: 100%; border-radius: 10px; background: linear-gradient(135deg, #FF4B4B, #764BA2);
         color: white !important; font-weight: 700; border: none; padding: 10px;
     }
-    [data-testid="stMetric"] { background-color: #1e1e1e; padding: 15px; border-radius: 12px; }
+    [data-testid="stMetric"] { background-color: #1e1e1e; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
     .news-item { font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
     .news-link { color: #FF4B4B; text-decoration: none; font-weight: 500; }
     </style>
     """, unsafe_allow_html=True)
+
+st_autorefresh(interval=60000, key="final_refresh_timer")
 
 # 온리원호출!!!!
 st_autorefresh(interval=60000, key="final_refresh_timer")
