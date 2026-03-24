@@ -13,67 +13,40 @@ from streamlit_autorefresh import st_autorefresh
 
 # --- [자동 토큰 갱신 시스템] ---
 def refresh_soopeh_token():
-    """토큰이 죽으면 몰래 브라우저를 띄워 다시 로그인합니다."""
     options = Options()
-    options.add_argument("--headless") # 창 안 띄움
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--headless") # 화면 안 띄움
+    options.add_argument("--window-size=1920,1080")
     
     try:
+        # 드라이버 자동 설치 및 실행
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=options)
         driver.get("https://www.soopeh.com/login")
-        time.sleep(3)
+        time.sleep(4) # 수페는 로딩이 좀 걸릴 수 있음
+
+        # 1. 아이디 입력
+        id_field = driver.find_element(By.ID, "login-identifier")
+        id_field.send_keys("yd60106")
+
+        # 2. 비밀번호 입력 (ID가 뭐든 '비밀번호 타입'인 칸을 무조건 찾음)
+        # 이 방식이 login-password라고 쓰는 것보다 100배 확실합니다.
+        pw_field = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
+        pw_field.send_keys("koreaCHY1488@!") # <--- 찬후님 비번 꼭 확인!
         
-        # 관심술사가 예측한 그 ID들!
-        driver.find_element(By.ID, "login-identifier").send_keys("yd60106")
-        # 혹시 ID가 다를 경우를 대비해 type='password'로 한 번 더 체크
-        try:
-            pw_field = driver.find_element(By.ID, "login-password")
-        except:
-            pw_field = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
-            
-        pw_field.send_keys("koreaCHY1488@!") # <--- 찬후님 비번!
-        pw_field.submit() # 엔터 효과
-        
-        time.sleep(5) # 로그인 로딩
-        
+        # 3. 로그인 버튼 클릭 (Submit 혹은 엔터)
+        pw_field.send_keys(Keys.ENTER) 
+        time.sleep(6) # 로그인 후 쿠키가 생성될 때까지 넉넉히 대기
+
+        # 4. 새로 생성된 쿠키 싹 긁어오기
         cookies = driver.get_cookies()
         driver.quit()
         
-        # 새 쿠키 문자열 조립
-        new_cookie = "; ".join([f"{c['name']}={c['value']}" for c in cookies])
-        return new_cookie
+        if cookies:
+            new_cookie = "; ".join([f"{c['name']}={c['value']}" for c in cookies])
+            return new_cookie
     except Exception as e:
+        st.warning(f"로그인 시도 중 오류 발생: {e}") # 에러 메시지 확인용
         return None
-
-def get_soopeh_nvda():
-    """수페 API 호출 (실패 시 자동 갱신)"""
-    if 'soopeh_cookie' not in st.session_state:
-        st.session_state.soopeh_cookie = "기본_쿠키_값" # 처음엔 아까 찾은 거 넣어도 됨
-        
-    url = "https://api.soopeh.com/economy/stocks/quotes?symbols=NVDA"
-    headers = {
-        "cookie": st.session_state.soopeh_cookie,
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36..."
-    }
-    
-    try:
-        res = requests.get(url, headers=headers, timeout=5)
-        # 토큰 만료(401/403) 시 자동 갱신 실행
-        if res.status_code != 200:
-            new_c = refresh_soopeh_token()
-            if new_c:
-                st.session_state.soopeh_cookie = new_c
-                headers["cookie"] = new_c
-                res = requests.get(url, headers=headers, timeout=5)
-        
-        if res.status_code == 200:
-            data = res.json()[0]
-            return {'curr': data.get('price', 0), 'perc': data.get('changeRate', 0)}
-    except:
-        pass
-    return None
 # --- 1. 페이지 설정 및 디자인 (CSS) - 찬후님 원본 100% 동일 ---
 st.set_page_config(page_title="국내-해외 주식 현황 모니터링", page_icon="📈", layout="wide")
 
