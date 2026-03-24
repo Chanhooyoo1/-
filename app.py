@@ -30,7 +30,7 @@ def get_naver_stock(code):
 
 # --- [2. RSS 뉴스 가져오기] ---
 def get_stock_news(limit=6):
-    rss_url = "https://www.mk.co.kr/rss/30200001/" # 매일경제 증권 RSS
+    rss_url = "https://www.mk.co.kr/rss/30200001/"
     try:
         feed = feedparser.parse(rss_url)
         if not feed.entries:
@@ -56,7 +56,6 @@ st.markdown("""
         font-style: italic; margin-bottom: 30px; 
     }
 
-    /* 찬후님 전용 빨강-보라 그라데이션 버튼 */
     div.stButton > button {
         width: 100%; border-radius: 12px; border: none; padding: 12px 20px;
         background: linear-gradient(135deg, #FF4B4B 0%, #764BA2 100%); 
@@ -69,20 +68,16 @@ st.markdown("""
         box-shadow: 0 8px 25px rgba(118, 75, 162, 0.6); 
     }
 
-    [data-testid="stMetric"] { 
-        background-color: #1e1e1e; padding: 20px; border-radius: 15px; 
-    }
+    [data-testid="stMetric"] { background-color: #1e1e1e; padding: 20px; border-radius: 15px; }
     
-    /* 뉴스 리스트 스타일 */
     .news-item { font-size: 13px; margin-bottom: 8px; border-bottom: 1px solid #222; padding-bottom: 5px; }
     .news-link { color: #FF4B4B; text-decoration: none; font-weight: 500; }
-    .news-link:hover { text-decoration: underline; color: #FF6B6B; }
     </style>
     """, unsafe_allow_html=True)
 
 st_autorefresh(interval=60000, key="auto_refresh")
 
-# --- [4. 사이드바 (설정 + RSS 뉴스)] ---
+# --- [4. 사이드바 (최신 문법 적용)] ---
 with st.sidebar:
     st.header("📊 모니터링 설정")
     stock_dict = {
@@ -95,34 +90,34 @@ with st.sidebar:
     }
     selected_names = st.multiselect("종목 선택", list(stock_dict.keys()), default=["엔비디아 (NVDA)", "삼성전자 (Samsung)"])
     
-    if st.button("새로고침 (수동)", use_container_width=True):
+    # use_container_width=True를 width='stretch'로 변경
+    if st.button("새로고침 (수동)", width='stretch'):
         st.rerun()
 
     st.divider()
     st.subheader("📰 실시간 주요 뉴스")
-    
-    # 뉴스 리스트 가져오기 및 출력
     news_list = get_stock_news(6)
     if news_list:
         for news in news_list:
-            # 제목이 너무 길면 잘라주기
             short_title = news["title"][:25] + ".." if len(news["title"]) > 25 else news["title"]
             st.markdown(f'<div class="news-item">· <a class="news-link" href="{news["link"]}" target="_blank">{short_title}</a></div>', unsafe_allow_html=True)
     else:
         st.info("뉴스를 불러올 수 없습니다.")
 
-# --- [5. 메인 화면 출력] ---
+# --- [5. 메인 화면 (최신 문법 적용)] ---
 st.markdown('<p class="main-title">주식 추세 일람 그래프</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">𝕽𝖊𝖆𝖑-𝖙𝖎𝖒𝖊 𝕱𝖎𝖓𝖆𝖓𝖈𝖎𝖆𝖑 𝕸𝖔𝖓𝖎𝖙𝖔𝖗𝖎𝖓𝖌 𝕾𝖞𝖘𝖙𝖊𝖒</p>', unsafe_allow_html=True)
 
-# 검색창 복구
-search_q = st.text_input("", placeholder="알아보고 싶은 종목명을 입력해주세요.")
+# label을 비우지 않고 숨김 처리 (웹 접근성 준수)
+search_q = st.text_input("종목 검색", placeholder="알아보고 싶은 종목명을 입력해주세요.", label_visibility="collapsed")
+
 if search_q:
     refined_q = f"{search_q} 주가"
     s_col1, s_col2, s_col3 = st.columns(3)
-    with s_col1: st.link_button("🌐 Google", f"https://www.google.com/search?q={refined_q}", use_container_width=True)
-    with s_col2: st.link_button("네이버", f"https://search.naver.com/search.naver?query={refined_q}", use_container_width=True)
-    with s_col3: st.link_button("다음", f"https://search.daum.net/search?q={refined_q}", use_container_width=True)
+    # 버튼 width='stretch' 적용
+    with s_col1: st.link_button("🌐 Google", f"https://www.google.com/search?q={refined_q}", width='stretch')
+    with s_col2: st.link_button("네이버", f"https://search.naver.com/search.naver?query={refined_q}", width='stretch')
+    with s_col3: st.link_button("다음", f"https://search.daum.net/search?q={refined_q}", width='stretch')
 
 st.divider()
 
@@ -131,7 +126,6 @@ if selected_names:
     for i, name in enumerate(selected_names):
         info = stock_dict[name]
         with cols[i]:
-            # 국내주는 네이버, 해외주는 yfinance
             if info["id"].isdigit():
                 data = get_naver_stock(info["id"])
                 if data:
@@ -144,11 +138,11 @@ if selected_names:
                     perc = (curr - prev) / prev * 100
                     st.metric(label=name, value=f"${curr:,.2f}", delta=f"{perc:+.2f}%")
 
-            # 그래프 그리기
             df = yf.Ticker(info["y"]).history(period="1d", interval="1m")
             if not df.empty:
                 fig = go.Figure(go.Scatter(x=df.index, y=df['Close'], fill='tozeroy', mode='lines', line=dict(color="#FF4B4B", width=3)))
                 fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=300, template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+                # plotly_chart에는 아직 width='stretch'가 적용되지 않으므로 그대로 유지하거나 use_container_width 사용
                 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 st.divider()
