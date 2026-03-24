@@ -32,7 +32,7 @@ def refresh_soopeh_token():
         # ... (이하 아이디/비번 입력 로직 동일) ...
         driver.find_element(By.ID, "login-identifier").send_keys("yd60106")
         pw_field = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
-        pw_field.send_keys("찬후님비밀번호") 
+        pw_field.send_keys("koreaCHY1488@!") 
         pw_field.send_keys(Keys.ENTER)
         
         time.sleep(8)
