@@ -139,8 +139,7 @@ if selected_names:
             
             if target_price > 0:
                 fig.add_hline(y=target_price, line_dash="dash", line_color="white", annotation_text=f"Target: {target_price:,.0f}", row=1, col=1)
-
-            fig.add_trace(go.Bar(x=df.index, y=df['거래량'], name='거래량', marker_color='#FF4B4B', opacity=0.5), row=2, col=1)
+                fig.add_trace(go.Bar(x=df.index, y=df['Volume'], name='Volume', marker_color='#FF4B4B', opacity=0.5), row=2, col=1)
 
             # 레이아웃 & 🔥 호버 글자 검정색 설정
             fig.update_layout(
