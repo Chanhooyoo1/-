@@ -25,7 +25,7 @@ def get_naver_stock(code):
         return {'curr': curr_price, 'perc': perc}
     except: return None
 
-def get_google_stock_news(limit=6):
+def get_google_stock_news(limit=10):
     #언론사 제거
     rss_url = "https://news.google.com/rss/search?q=주식&hl=ko&gl=KR&ceid=KR:ko"
     try:
