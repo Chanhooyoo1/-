@@ -7,10 +7,9 @@ from bs4 import BeautifulSoup
 import feedparser
 from streamlit_autorefresh import st_autorefresh
 
-# --- [1. 함수 정의 구역 (에러 방지를 위해 맨 위로 배치)] ---
+# --- [1. 엔진 함수 정의] ---
 
 def get_naver_stock(code):
-    """네이버 파이낸스 실시간 주가 크롤링"""
     url = f"https://finance.naver.com/item/main.naver?code={code}"
     try:
         res = requests.get(url, timeout=5)
@@ -28,15 +27,12 @@ def get_naver_stock(code):
     except: return None
 
 def get_stock_news(limit=6):
-    """주식/증권 전용 RSS 뉴스 (매일경제 증권 카테고리)"""
-    # 주식 관련 기사만 모아주는 전용 RSS 주소입니다.
-    rss_url = "https://www.mk.co.kr/rss/30200001/" 
+    """주식/경제 전문 뉴스 RSS (매일경제 증권)"""
+    rss_url = "https://www.mk.co.kr/rss/30200001/"
     try:
         feed = feedparser.parse(rss_url)
         if not feed.entries:
-            # 대안: 한국경제 증권 RSS
-            feed = feedparser.parse("https://www.hankyung.com/feed/stock")
-        
+            return []
         return [{"title": entry.title, "link": entry.link} for entry in feed.entries[:limit]]
     except: return []
 
@@ -50,7 +46,7 @@ st.markdown("""
     .main-title { font-size: 35px; font-weight: 800; color: white; text-align: center; margin-bottom: 20px; }
     div.stButton > button {
         width: 100%; border-radius: 10px; background: linear-gradient(135deg, #FF4B4B, #764BA2);
-        color: white; font-weight: 700; border: none; padding: 10px;
+        color: white !important; font-weight: 700; border: none; padding: 10px;
     }
     [data-testid="stMetric"] { background-color: #1e1e1e; padding: 15px; border-radius: 12px; }
     .news-item { font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
@@ -60,7 +56,7 @@ st.markdown("""
 
 st_autorefresh(interval=60000, key="auto_refresh")
 
-# --- [3. 사이드바 (설정 & 주식 뉴스)] ---
+# --- [3. 사이드바 (괄호 짝 맞춤 완료)] ---
 with st.sidebar:
     st.header("📊 설정")
     stock_dict = {
@@ -69,4 +65,77 @@ with st.sidebar:
         "엔비디아 (NVDA)": {"id": "NVDA", "y": "NVDA"},
         "애플 (AAPL)": {"id": "AAPL", "y": "AAPL"}
     }
-    selected_names = st.multiselect("종목 선택", list(stock_dict.keys()),
+    
+    # 에러 났던 부분: 괄호 짝을 정확히 맞췄습니다.
+    selected_names = st.multiselect(
+        "종목 선택", 
+        options=list(stock_dict.keys()), 
+        default=["엔비디아 (NVDA)", "삼성전자 (Samsung)"]
+    )
+    
+    st.divider()
+    st.subheader("🔔 가격 알림")
+    target_nvda = st.number_input("NVDA 목표 ($)", value=1000.0)
+    target_samsung = st.number_input("삼성 목표 (원)", value=80000)
+
+    if st.button("새로고침", width='stretch', key="sidebar_btn"):
+        st.rerun()
+
+    st.divider()
+    st.subheader("📰 주식 뉴스")
+    news_data = get_stock_news(6)
+    if news_data:
+        for news in news_data:
+            short_t = news["title"][:22] + ".." if len(news["title"]) > 22 else news["title"]
+            st.markdown(f'<div class="news-item">· <a class="news-link" href="{news["link"]}" target="_blank">{short_t}</a></div>', unsafe_allow_html=True)
+    else:
+        st.info("뉴스를 가져올 수 없습니다. (라이브러리 확인 필요)")
+
+# --- [4. 메인 화면] ---
+st.markdown('<p class="main-title">실시간 주식 대시보드</p>', unsafe_allow_html=True)
+
+search_q = st.text_input("검색", placeholder="종목명을 입력하세요", label_visibility="collapsed")
+if search_q:
+    c1, c2, c3 = st.columns(3)
+    with c1: st.link_button("🌐 Google", f"https://www.google.com/search?q={search_q}+주가", width='stretch')
+    with c2: st.link_button("네이버", f"https://search.naver.com/search.naver?query={search_q}+주가", width='stretch')
+    with c3: st.link_button("다음", f"https://search.daum.net/search?q={search_q}+주가", width='stretch')
+
+st.divider()
+
+if selected_names:
+    cols = st.columns(len(selected_names))
+    for i, name in enumerate(selected_names):
+        info = stock_dict[name]
+        with cols[i]:
+            # 주가 수집
+            if info["id"].isdigit(): # 국내주식
+                res = get_naver_stock(info["id"])
+                if res:
+                    st.metric(label=name, value=f"{res['curr']:,}원", delta=f"{res['perc']:+.2f}%")
+                    if name == "삼성전자 (Samsung)" and res['curr'] >= target_samsung:
+                        st.toast(f"🚀 삼성전자 {target_samsung}원 돌파!", icon="🔥")
+            else: # 해외주식
+                y_ticker = yf.Ticker(info["y"])
+                y_hist = y_ticker.history(period="1d")
+                if not y_hist.empty:
+                    curr_val = y_hist['Close'].iloc[-1]
+                    st.metric(label=name, value=f"${curr_val:,.2f}")
+                    if name == "엔비디아 (NVDA)" and curr_val >= target_nvda:
+                        st.toast(f"🚀 NVDA ${target_nvda} 돌파!", icon="🔥")
+
+            # 그래프 (1분 단위)
+            df = yf.Ticker(info["y"]).history(period="1d", interval="1m")
+            if not df.empty:
+                fig = go.Figure(go.Scatter(x=df.index, y=df['Close'], fill='tozeroy', mode='lines', line=dict(color="#FF4B4B")))
+                fig.update_layout(margin=dict(l=0,r=0,t=10,b=0), height=250, template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+                st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+st.divider()
+m1, m2 = st.columns([4, 1])
+with m1: st.text_area("메모장", placeholder="오늘의 투자 메모..", height=100)
+with m2: 
+    st.write("")
+    st.write("")
+    if st.button("새로고침🔄", width='stretch', key="main_btn"):
+        st.rerun()
