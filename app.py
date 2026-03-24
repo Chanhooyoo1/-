@@ -118,8 +118,9 @@ with st.sidebar:
         "삼성전자 (Samsung)": {"id": "005930", "type": "KR", "y": "005930.KS"},
         "현대자동차 (Hyundai)": {"id": "005380", "type": "KR", "y": "005380.KS"},
         "알파벳(구글) (GOOG)": {"id": "GOOG", "type": "US", "y": "GOOG"},
-        "맥도날드 (MCD)": {"id": "MCD", "type": "US", "y": "MCD"}
+        "맥도날드 (MCD)": {"id": "MCD", "type": "US", "y": "MCD"},
        "맥도날드 (MCD)": {"id": "MCD", "type": "US", "y": "MCD"}
+       
     }
     selected_names = st.multiselect("종목 선택", list(stock_dict.keys()))
     period_map = {"1주일": "7d", "1개월": "1mo", "3개월": "3mo", "1년": "1y"}
