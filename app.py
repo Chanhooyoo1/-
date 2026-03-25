@@ -56,7 +56,7 @@ div.stButton > button {
     transition: all 0.3s ease; /* 부드러운 전환 효과 추가 */
 }
 
-/* 🔥 [추가] 버튼 호버(마우스 올렸을 때) 효과 */
+/*  버튼 호버(마우스 올렸을 때) 효과 */
 div.stButton > button:hover {
     background: linear-gradient(135deg, #FF6B6B, #8E5ACD) !important; /* 색상을 살짝 밝게 */
     transform: translateY(-2px); /* 위로 살짝 떠오르는 효과 */
@@ -121,9 +121,8 @@ div.stButton > button:active {
     </style>
     """, unsafe_allow_html=True)
 # 스타일 정의가 끝나는 지점(unsafe_allow_html=True) 바로 아래에 추가하세요!
-
-st.markdown('<div class="𝕽𝖊𝖆𝖑-𝖙𝖎𝖒𝖊 𝖘𝖙𝖔𝖈𝖐 𝖑𝖎𝖘𝖙𝖎𝖓𝖌 𝖘𝖞𝖘𝖙𝖊𝖒"></div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">실시간 주식 종목 일람 시스템</div>', unsafe_allow_html=True)
+st.markdown('<div class="𝕽𝖊𝖆𝖑-𝖙𝖎𝖒𝖊 𝖘𝖙𝖔𝖈𝖐 𝖑𝖎𝖘𝖙𝖎𝖓𝖌 𝖘𝖞𝖘𝖙𝖊𝖒"></div>', unsafe_allow_html=True)
 
 # 그 아래에 기존에 있던 st_autorefresh 등이 오면 됩니다.
 st_autorefresh(interval=60000, key="final_refresh_timer")
