@@ -49,7 +49,7 @@ st.markdown("""
     <style>
     /* 메인 타이틀: 그라데이션 및 그림자 */
     .main-title {
-        font-size: 45px !important; 
+        font-size: 30px !important; 
         font-weight: 900 !important;
         background: linear-gradient(135deg, #FF4B4B, #764BA2);
         -webkit-background-clip: text; 
@@ -62,7 +62,7 @@ st.markdown("""
     
     /* 서브 타이틀 */
     .sub-title {
-        font-size: 15px !important; 
+        font-size: 25px !important; 
         font-weight: 400 !important; 
         color: #888888 !important;
         text-align: center; 
