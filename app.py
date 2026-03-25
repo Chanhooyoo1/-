@@ -120,12 +120,46 @@ div.stButton > button:active {
     }
     </style>
     """, unsafe_allow_html=True)
-# 스타일 정의가 끝나는 지점(unsafe_allow_html=True) 바로 아래에 추가하세요!
-st.markdown('<div class="sub-title">실시간 주식 종목 일람 시스템</div>', unsafe_allow_html=True)
-st.markdown('<div class="𝕽𝖊𝖆𝖑-𝖙𝖎𝖒𝖊 𝖘𝖙𝖔𝖈𝖐 𝖑𝖎𝖘𝖙𝖎𝖓𝖌 𝖘𝖞𝖘𝖙𝖊𝖒"></div>', unsafe_allow_html=True)
+st.markdown("""
+        <style>
+        /* 메인 타이틀: 그라데이션 및 애니메이션 효과 */
+        .main-title {
+            font-size: 45px !important; 
+            font-weight: 900 !important;
+            background: linear-gradient(135deg, #FF4B4B, #764BA2);
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            text-align: center; 
+            margin-top: -20px;
+            margin-bottom: 5px;
+            letter-spacing: -1px;
+        }
+        
+        /* 서브 타이틀: 깔끔한 폰트와 간격 */
+        .sub-title {
+            font-size: 16px !important; 
+            font-weight: 300 !important; 
+            color: #BBBBBB !important;
+            text-align: center; 
+            margin-bottom: 40px; 
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
 
-# 그 아래에 기존에 있던 st_autorefresh 등이 오면 됩니다.
-st_autorefresh(interval=60000, key="final_refresh_timer")
+        /* 구분선 스타일 */
+        .custom-divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #FF4B4B, #764BA2, transparent);
+            margin-bottom: 30px;
+            opacity: 0.5;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # 2. 실제 화면에 표시될 타이틀 섹션 (여기에 넣으세요!)
+    st.markdown('<div class="main-title">QUANTUM MONITOR</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">Real-time Stock Intelligence System</div>', unsafe_allow_html=True)
+    st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
 # 3. 사이드바
 with st.sidebar:
     st.header("⚙ 종목ㆍ기간 설정")
