@@ -44,8 +44,31 @@ st.set_page_config(page_title="주식 실시간 모니터링 시스템", page_ic
 
 st.markdown("""
     <style>
-    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-    * { font-family: 'Pretendard', sans-serif; }
+   /* 일반 버튼 스타일 */
+div.stButton > button {
+    width: 100%; 
+    border-radius: 10px; 
+    background: linear-gradient(135deg, #FF4B4B, #764BA2);
+    color: white !important; 
+    font-weight: 700; 
+    border: none; 
+    padding: 10px;
+    transition: all 0.3s ease; /* 부드러운 전환 효과 추가 */
+}
+
+/* 🔥 [추가] 버튼 호버(마우스 올렸을 때) 효과 */
+div.stButton > button:hover {
+    background: linear-gradient(135deg, #FF6B6B, #8E5ACD) !important; /* 색상을 살짝 밝게 */
+    transform: translateY(-2px); /* 위로 살짝 떠오르는 효과 */
+    box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4); /* 그림자 강조 */
+    border: none !important;
+    color: white !important;
+}
+
+/* 버튼 클릭 시 효과 */
+div.stButton > button:active {
+    transform: translateY(0px);
+}
     
     /* 메인 타이틀 */
     .main-title {
