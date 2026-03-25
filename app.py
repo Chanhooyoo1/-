@@ -44,36 +44,97 @@ st.set_page_config(page_title="주식 실시간 모니터링 시스템", page_ic
 # --- 여기에 기존 st.set_page_config 가 있을 겁니다 ---
 
 # 1. 스타일 정의 (왼쪽 벽에 딱 붙여서 넣어주세요)
+# 1. 통합 스타일 정의 (기존 스타일 + 새로운 타이틀 디자인)
 st.markdown("""
     <style>
+    /* 메인 타이틀: 그라데이션 및 그림자 */
     .main-title {
         font-size: 45px !important; 
         font-weight: 900 !important;
         background: linear-gradient(135deg, #FF4B4B, #764BA2);
         -webkit-background-clip: text; 
         -webkit-text-fill-color: transparent;
+        text-shadow: 2px 2px 10px rgba(255, 75, 75, 0.3);
         text-align: center; 
         margin-top: -20px;
         margin-bottom: 5px;
     }
+    
+    /* 서브 타이틀 */
     .sub-title {
-        font-size: 16px !important; 
-        font-weight: 300 !important; 
-        color: #BBBBBB !important;
+        font-size: 15px !important; 
+        font-weight: 400 !important; 
+        color: #888888 !important;
         text-align: center; 
-        margin-bottom: 40px; 
-        letter-spacing: 2px;
+        margin-bottom: 30px; 
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
     }
+
+    /* 상단 구분선 */
     .custom-divider {
         height: 2px;
         background: linear-gradient(to right, transparent, #FF4B4B, #764BA2, transparent);
-        margin-bottom: 30px;
-        opacity: 0.5;
+        margin-bottom: 35px;
+        opacity: 0.6;
+    }
+
+    /* 일반 버튼 스타일 & 애니메이션 */
+    div.stButton > button {
+        width: 100%; 
+        border-radius: 12px; 
+        background: linear-gradient(135deg, #FF4B4B, #764BA2);
+        color: white !important; 
+        font-weight: 700; 
+        border: none; 
+        padding: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 버튼 호버 효과 */
+    div.stButton > button:hover {
+        background: linear-gradient(135deg, #FF6B6B, #8E5ACD) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 75, 75, 0.4);
+        border: none !important;
+        color: white !important;
+    }
+
+    /* 버튼 클릭 시 */
+    div.stButton > button:active {
+        transform: translateY(0px);
+    }
+    
+    /* 메트릭(가격표) 박스 */
+    [data-testid="stMetric"] { 
+        background-color: #1e1e1e; 
+        padding: 15px; 
+        border-radius: 15px; 
+        border: 1px solid #333;
+    }
+    
+    /* 뉴스 리스트 스타일 */
+    .news-item { font-size: 13px; margin-bottom: 12px; border-bottom: 1px solid #262626; padding-bottom: 8px; }
+    .news-link { color: #FF4B4B; text-decoration: none; font-weight: 500; }
+    .news-link:hover { text-decoration: underline; }
+
+    /* 모바일 사이드바 열기 버튼(삼선메뉴) 최적화 */
+    button[data-testid="stSidebarCollapseButton"] {
+        width: 55px !important;
+        height: 55px !important;
+        background-color: rgba(255, 75, 75, 0.15) !important;
+        border-radius: 12px !important;
+    }
+
+    button[data-testid="stSidebarCollapseButton"] svg {
+        width: 32px !important;
+        height: 32px !important;
+        fill: #FF4B4B !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 2. 화면에 표시될 제목 (이 부분도 왼쪽 끝에 딱 붙여주세요)
+# 2. 실제 화면에 렌더링되는 타이틀 섹션
 st.markdown('<div class="main-title">QUANTUM MONITOR</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Real-time Stock Intelligence System</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
