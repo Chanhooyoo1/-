@@ -182,6 +182,21 @@ input[type="reset"]:hover{
 #ChatBtn{
 	width: 50px !important;
 }
+/* 기본: 홈/준비 */
+.ChatBox{
+	width: 790px !important;
+}
+
+/* 게임 박스가 켜진 상태에서 확장 */
+.GameBox[style*="display:block"] ~ .ChatBox,
+.GameBox[style*="display: block"] ~ .ChatBox,
+body.state-playing .ChatBox,
+body.game .ChatBox{
+	width: 1000px !important;
+}
+
+#Talk{ width: calc(100% - 50px) !important; }
+#ChatBtn{ width: 50px !important; }
 
 
 # 기사 가져오는 엔진
