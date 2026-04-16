@@ -609,7 +609,181 @@ with m2:
     st.write("")
     if st.button("새로고침🔄", width='stretch', key="main_btn"): st.rerun()
 
-/* ===== Dark Purple Base + Static Weak Neon ===== */
+/* =========================================
+   버튼 개별 그라데이션 시스템
+   대상: Spectate/SetRoom/NewRoom/QuickRoom/Shop/Dictionary/Invite/Practice/Ready/Start/Replay
+   ========================================= */
+
+/* 1) 공통 적용 규칙 (각 버튼이 자기 변수 사용) */
+#SpactateBtn, #SetRoomBtn, #NewRoomBtn, #QuickRoomBtn, #ShopBtn, #DictionaryBtn,
+#InviteBtn, #PracticeBtn, #ReadyBtn, #StartBtn, #ReplayBtn{
+  background: var(--btn-grad, linear-gradient(135deg, #cf0034, #9933ff)) !important;
+  color: var(--btn-fg, #fff) !important;
+  border: 1px solid var(--btn-border, rgba(255,255,255,.18)) !important;
+  transition: all .25s linear(0 0%, 0.2 45.98%, 0.68 80.86%, 1 100%) !important;
+  box-shadow: 0 0 8px rgba(255,51,102,.28), 0 0 14px rgba(153,51,255,.22);
+}
+
+#SpactateBtn:hover, #SetRoomBtn:hover, #NewRoomBtn:hover, #QuickRoomBtn:hover, #ShopBtn:hover, #DictionaryBtn:hover,
+#InviteBtn:hover, #PracticeBtn:hover, #ReadyBtn:hover, #StartBtn:hover, #ReplayBtn:hover{
+  background: var(--btn-hover-grad, linear-gradient(135deg, #ff4d7a, #a64dff)) !important;
+  color: var(--btn-hover-fg, #fff) !important;
+  box-shadow: 0 0 12px rgba(255,51,102,.45), 0 0 22px rgba(153,51,255,.35);
+  transform: translateY(-1px);
+}
+
+/* 토글/활성 상태 */
+#SpactateBtn.toggled, #SetRoomBtn.toggled, #NewRoomBtn.toggled, #QuickRoomBtn.toggled, #ShopBtn.toggled, #DictionaryBtn.toggled,
+#InviteBtn.toggled, #PracticeBtn.toggled, #ReadyBtn.toggled, #StartBtn.toggled, #ReplayBtn.toggled,
+#SpactateBtn.active, #SetRoomBtn.active, #NewRoomBtn.active, #QuickRoomBtn.active, #ShopBtn.active, #DictionaryBtn.active,
+#InviteBtn.active, #PracticeBtn.active, #ReadyBtn.active, #StartBtn.active, #ReplayBtn.active{
+  background: var(--btn-active-grad, linear-gradient(135deg, #d12b55, #7f2ed1)) !important;
+  color: var(--btn-active-fg, #fff) !important;
+}
+
+/* 2) 버튼별 그라데이션 정의 (원하는 색으로 바꾸면 됨) */
+#SpectateBtn{
+  --btn-grad: linear-gradient(135deg, #f83939, #ac33e3);
+  --btn-hover-grad: linear-gradient(135deg, #4b8ff0, #4b7f96);
+  --btn-active-grad: linear-gradient(135deg, #2e62aa, #01a0ec);
+}
+#SetRoomBtn{
+  --btn-grad: linear-gradient(135deg, #ab33e4, #80bfe6);
+  --btn-hover-grad: linear-gradient(135deg, #ab33e4, #8280E6);
+  --btn-active-grad: linear-gradient(135deg, #e14b59, #e0ab5f);
+}
+#NewRoomBtn{
+  --btn-grad: linear-gradient(135deg, #fb2525, #b800ff);
+  --btn-hover-grad: linear-gradient(135deg, #ff4747, #ac33e3);
+  --btn-active-grad: linear-gradient(135deg, #0e7f76, #2fc967);
+}
+#QuickRoomBtn{
+  --btn-grad: linear-gradient(135deg, #2f71e9, #6f87ff);
+  --btn-hover-grad: linear-gradient(135deg, #3d7cea, #8b9bef);
+  --btn-active-grad: linear-gradient(135deg, #d83a5a, #344ed4);
+}
+#ShopBtn{
+  --btn-grad: linear-gradient(135deg, #ff8f01, #ffd200);
+  --btn-hover-grad: linear-gradient(135deg, #ffab3d, #ffe14f);
+  --btn-active-grad: linear-gradient(135deg, #d38218, #d9b300);
+}
+#DictionaryBtn{
+  --btn-grad: linear-gradient(135deg, #058300, #68d873);
+  --btn-hover-grad: linear-gradient(135deg, #1e8831, #7eff88);
+  --btn-active-grad: linear-gradient(135deg, #7423bb, #3e00bb);
+}
+#InviteBtn{
+  --btn-grad: linear-gradient(135deg, #ab33e4, #d69ce3);
+  --btn-hover-grad: linear-gradient(135deg, #8027ff, #ee9fec);
+  --btn-active-grad: linear-gradient(135deg, #00a7d9, #0060d6);
+}
+#PracticeBtn{
+  --btn-grad: linear-gradient(135deg, #d3dc00, #a6a600);
+  --btn-hover-grad: linear-gradient(135deg, #ffe810, #987a23);
+  --btn-active-grad: linear-gradient(135deg, #4a9628, #93c957);
+}
+#ReadyBtn{
+  --btn-grad: linear-gradient(135deg, #ff3366, #b56cff);
+  --btn-hover-grad: linear-gradient(135deg, #ff4d7a, #ad4dff);
+  --btn-active-grad: linear-gradient(135deg, #d62a55, #7f2bd1);
+}
+#StartBtn{
+  --btn-grad: linear-gradient(135deg, #ff3939, #8d47ef);
+  --btn-hover-grad: linear-gradient(135deg, #fb1616, #f17979);
+  --btn-active-grad: linear-gradient(135deg, #d9472a, #bc1f63);
+}
+#ReplayBtn{
+  --btn-grad: linear-gradient(135deg, #ff0000, #ff8383);
+  --btn-hover-grad: linear-gradient(135deg, #e30d0d, #ffcbcb);
+  --btn-active-grad: linear-gradient(135deg, #187c58, #7ed6a0);
+}
+/* =========================================
+   부모 -> 자식 트랜지션 상속 시스템
+   ========================================= */
+
+/* 1) 전역 기본값(부모) */
+:root{
+  --ui-transition: all .25s linear;
+  --ui-hover-transform: translateY(-1px);
+  --ui-hover-filter: brightness(1.12);
+}
+
+/* 2) 부모 컨테이너별 오버라이드 가능
+   예: 게임방에서만 더 느리게 */
+#Wrap{
+  --ui-transition: all .35s linear;
+}
+.GameBox{
+  --ui-transition: all .18s ease-out;
+}
+
+/* 3) 대상 버튼들: 부모 변수 사용 */
+#SpactateBtn, #SetRoomBtn, #NewRoomBtn, #QuickRoomBtn, #ShopBtn, #DictionaryBtn,
+#InviteBtn, #PracticeBtn, #ReadyBtn, #StartBtn, #ReplayBtn{
+  transition: var(--btn-transition, var(--ui-transition)) !important;
+}
+
+/* 4) hover도 부모 변수 사용 */
+#SpactateBtn:hover, #SetRoomBtn:hover, #NewRoomBtn:hover, #QuickRoomBtn:hover, #ShopBtn:hover, #DictionaryBtn:hover,
+#InviteBtn:hover, #PracticeBtn:hover, #ReadyBtn:hover, #StartBtn:hover, #ReplayBtn:hover{
+  transform: var(--btn-hover-transform, var(--ui-hover-transform));
+  filter: var(--btn-hover-filter, var(--ui-hover-filter));
+}
+
+/* 5) 버튼 개별 커스텀도 가능 */
+#StartBtn{
+  --btn-transition: all .15s linear;
+  --btn-hover-transform: translateY(-2px) scale(1.01);
+}
+/* 대상 버튼 목록에 나가기 버튼 추가 */
+#SpactateBtn, #SetRoomBtn, #NewRoomBtn, #QuickRoomBtn, #ShopBtn, #DictionaryBtn,
+#InviteBtn, #PracticeBtn, #ReadyBtn, #StartBtn, #ReplayBtn, #ExitBtn{
+  transition: var(--btn-transition, var(--ui-transition)) !important;
+  background: var(--btn-grad, linear-gradient(135deg, #ff3366, #9933ff)) !important;
+}
+
+/* hover에도 추가 */
+#SpactateBtn:hover, #SetRoomBtn:hover, #NewRoomBtn:hover, #QuickRoomBtn:hover, #ShopBtn:hover, #DictionaryBtn:hover,
+#InviteBtn:hover, #PracticeBtn:hover, #ReadyBtn:hover, #StartBtn:hover, #ReplayBtn:hover, #ExitBtn:hover{
+  transform: var(--btn-hover-transform, var(--ui-hover-transform));
+  filter: var(--btn-hover-filter, var(--ui-hover-filter));
+  background: var(--btn-hover-grad, linear-gradient(135deg, #ff4d7a, #ad4dff)) !important;
+}
+
+/* 나가기 버튼 개별 그라데이션 */
+#ExitBtn{
+  --btn-grad: linear-gradient(135deg, #ff0000, #e75656);
+  --btn-hover-grad: linear-gradient(135deg, #ff3434, #ff7373);
+  --btn-active-grad: linear-gradient(135deg, #d9365a, #d93f25);
+}
+/* 대상 버튼 공통 (글자색 변수 적용) */
+#SpactateBtn, #SetRoomBtn, #NewRoomBtn, #QuickRoomBtn, #ShopBtn, #DictionaryBtn,
+#InviteBtn, #PracticeBtn, #ReadyBtn, #StartBtn, #ReplayBtn, #ExitBtn{
+  color: var(--btn-fg, var(--ui-btn-fg)) !important;
+}
+
+#SpactateBtn:hover, #SetRoomBtn:hover, #NewRoomBtn:hover, #QuickRoomBtn:hover, #ShopBtn:hover, #DictionaryBtn:hover,
+#InviteBtn:hover, #PracticeBtn:hover, #ReadyBtn:hover, #StartBtn:hover, #ReplayBtn:hover, #ExitBtn:hover{
+  color: var(--btn-hover-fg, var(--ui-btn-hover-fg)) !important;
+}
+
+#SpactateBtn.toggled, #SetRoomBtn.toggled, #NewRoomBtn.toggled, #QuickRoomBtn.toggled, #ShopBtn.toggled, #DictionaryBtn.toggled,
+#InviteBtn.toggled, #PracticeBtn.toggled, #ReadyBtn.toggled, #StartBtn.toggled, #ReplayBtn.toggled, #ExitBtn.toggled,
+#SpactateBtn.active, #SetRoomBtn.active, #NewRoomBtn.active, #QuickRoomBtn.active, #ShopBtn.active, #DictionaryBtn.active,
+#InviteBtn.active, #PracticeBtn.active, #ReadyBtn.active, #StartBtn.active, #ReplayBtn.active, #ExitBtn.active{
+  color: var(--btn-active-fg, var(--ui-btn-active-fg)) !important;
+}
+#StartBtn{
+  --btn-fg: #fff;
+  --btn-hover-fg: #ffe9f6;
+  --btn-active-fg: #ffd2ec;
+}
+#ExitBtn{
+  --btn-fg: #ffffff;
+  --btn-hover-fg: #fff3f3;
+  --btn-active-fg: #ffdede;
+}
+* ===== Dark Purple Base + Static Weak Neon ===== */
 :root{
   --bg-dark-purple: #140a22;
   --panel-dark-purple: rgba(36, 18, 56, 0.78);
@@ -650,5 +824,4 @@ body{
   animation: none !important;
   opacity: 0.8 !important;
 }
-
 
