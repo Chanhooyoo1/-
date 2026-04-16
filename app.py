@@ -1188,3 +1188,57 @@ body{
   --btn-hover-fg: #fff3f3;
   --btn-active-fg: #ffdede;
 }
+
+/* 배경 그라데이션 + 약한 정적 네온만 */
+
+:root{
+  --bg-dark-purple: #0e0818;
+  --panel-dark-purple: rgba(22, 12, 34, 0.82);
+  --panel-dark-purple-2: rgba(16, 9, 27, 0.84);
+  --neon-weak-pink: rgba(255, 90, 180, 0.16);
+  --neon-weak-purple: rgba(160, 90, 255, 0.14);
+}
+
+/* 배경 */
+html, body{
+  background-color: var(--bg-dark-purple) !important;
+}
+body{
+  background:
+    radial-gradient(1200px 700px at 15% 10%, rgba(170,70,255,.22), transparent 60%),
+    radial-gradient(1000px 600px at 85% 90%, rgba(255,80,170,.18), transparent 60%),
+    linear-gradient(160deg, #12071f 0%, #1a0c2e 45%, #12071f 100%) !important;
+}
+
+/* 패널 그라데이션 + 약한 네온 */
+.Product, .dialog, .UserListBox, .RoomListBox, .ShopBox, .RoomBox, .GameBox, .MeBox, .ChatBox, .ADBox{
+  background: linear-gradient(160deg, var(--panel-dark-purple), var(--panel-dark-purple-2)) !important;
+  border: 1px solid rgba(220, 180, 255, 0.14) !important;
+  box-shadow:
+    0 0 8px var(--neon-weak-pink),
+    0 0 14px var(--neon-weak-purple) !important;
+}
+
+/* 카드류 보정 */
+.rooms-item{
+  background-color: rgba(28, 14, 44, 0.72) !important;
+}
+
+/* 외곽 네온(정적, 반응 없음) */
+#Wrap, #kkutu-wrap{
+  position: relative;
+  overflow: visible !important;
+}
+#Wrap::after, #kkutu-wrap::after{
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 140, 220, 0.28) !important;
+  box-shadow:
+    0 0 10px rgba(255, 90, 180, 0.18),
+    0 0 20px rgba(140, 90, 255, 0.14) !important;
+  animation: none !important;
+  opacity: .8 !important;
+  pointer-events: none;
+}
