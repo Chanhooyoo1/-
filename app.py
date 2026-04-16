@@ -1242,3 +1242,6 @@ body{
   opacity: .8 !important;
   pointer-events: none;
 }
+/* 전체 배경 통일 그라데이션 */
+:root{
+  --bg-unified-grad: linear-gradient(160deg, #12071f 0%, #1a0c2e 45%, #12071f 100%);
