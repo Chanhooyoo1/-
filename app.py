@@ -965,3 +965,40 @@ body{
   color: var(--btn-fg, var(--ui-btn-fg)) !important;
   border: 1px solid rgba(255,255,255,.18) !important;
 }
+
+/* 창끼리 연결감 */
+:root{
+  --link-line: rgba(180,120,255,.22);
+  --link-glow: rgba(255,90,180,.16);
+}
+
+/* 창 공통: 테두리 톤 통일 */
+.Product, .dialog, .UserListBox, .RoomListBox, .ShopBox, .RoomBox, .GameBox, .MeBox, .ChatBox, .ADBox{
+  border-color: var(--link-line) !important;
+  border-radius: 12px !important;
+}
+
+/* 좌/우 붙어있는 대표 조합의 간격 최소화 */
+.UserListBox + .RoomListBox,
+.MeBox + .ChatBox{
+  margin-left: 4px !important;
+}
+
+/* 연결 브릿지(사이 발광 라인) */
+.UserListBox + .RoomListBox::before,
+.MeBox + .ChatBox::before{
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: 12px;
+  width: 6px;
+  height: calc(100% - 24px);
+  background: linear-gradient(to bottom, transparent, var(--link-line), transparent);
+  box-shadow: 0 0 8px var(--link-glow);
+  pointer-events: none;
+}
+
+/* before 기준점 */
+.UserListBox, .RoomListBox, .MeBox, .ChatBox{
+  position: relative;
+}
