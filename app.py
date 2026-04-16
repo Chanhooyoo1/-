@@ -907,3 +907,61 @@ body{
 .Product, .dialog, .UserListBox, .RoomListBox, .ShopBox, .RoomBox, .GameBox, .MeBox, .ChatBox, .ADBox{
   background: linear-gradient(160deg, rgba(40,18,62,.82), rgba(28,12,45,.82)) !important;
 }
+
+ /* =========================================
+   버튼 + 다크보라 배경 + 약한 정적 네온 (정리본)
+   ========================================= */
+
+:root{
+  --ui-transition: all .25s linear;
+  --ui-hover-transform: translateY(-1px);
+  --ui-hover-filter: brightness(1.12);
+
+  --ui-btn-fg: #fff;
+  --ui-btn-hover-fg: #fff;
+  --ui-btn-active-fg: #fff7ff;
+
+  --bg-dark-purple: #000000;
+  --panel-dark-purple: rgb(0 0 0 / 78%);
+  --panel-dark-purple-soft: rgba(28, 14, 44, 0.72);
+  --neon-weak-pink: rgba(255, 90, 180, 0.16);
+  --neon-weak-purple: rgba(160, 90, 255, 0.14);
+}
+
+/* 배경 */
+html, body{
+  background-color: var(--bg-dark-purple) !important;
+}
+body{
+  background:
+    radial-gradient(1200px 700px at 15% 10%, rgba(170,70,255,.22), transparent 60%),
+    radial-gradient(1000px 600px at 85% 90%, rgba(255,80,170,.18), transparent 60%),
+    linear-gradient(160deg, #12071f 0%, #1a0c2e 45%, #12071f 100%) !important;
+}
+
+/* 패널 */
+.Product, .dialog, .UserListBox, .RoomListBox, .ShopBox, .RoomBox, .GameBox, .MeBox, .ChatBox, .ADBox{
+  background: linear-gradient(160deg, rgba(40,18,62,.82), rgba(28,12,45,.82)) !important;
+  border: 1px solid rgba(220, 180, 255, 0.14) !important;
+  box-shadow: 0 0 8px var(--neon-weak-pink), 0 0 14px var(--neon-weak-purple) !important;
+}
+.rooms-item{
+  background-color: var(--panel-dark-purple-soft) !important;
+}
+
+/* 외곽 네온 */
+#Wrap::after, #kkutu-wrap::after{
+  border: 1px solid rgba(255, 140, 220, 0.28) !important;
+  box-shadow: 0 0 10px rgba(255, 90, 180, 0.18), 0 0 20px rgba(140, 90, 255, 0.14) !important;
+  animation: none !important;
+  opacity: .8 !important;
+}
+
+/* 버튼 공통 */
+#SpactateBtn, #SpectateBtn, #SetRoomBtn, #NewRoomBtn, #QuickRoomBtn, #ShopBtn, #DictionaryBtn,
+#InviteBtn, #PracticeBtn, #ReadyBtn, #StartBtn, #ReplayBtn, #ExitBtn{
+  transition: var(--btn-transition, var(--ui-transition)) !important;
+  background: var(--btn-grad, linear-gradient(135deg, #cf0034, #200040)) !important;
+  color: var(--btn-fg, var(--ui-btn-fg)) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+}
