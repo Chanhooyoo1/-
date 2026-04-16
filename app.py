@@ -197,6 +197,42 @@ body.game .ChatBox{
 
 #Talk{ width: calc(100% - 50px) !important; }
 #ChatBtn{ width: 50px !important; }
+/* 1) 공통: 버튼이 각자 변수값을 쓰도록 */
+#Top .menu-btn,
+.kkutu-menu button{
+  background: var(--tab-bg, rgba(255,255,255,0.2)) !important;
+  color: var(--tab-fg, #fff) !important;
+  border-color: var(--tab-bd, transparent) !important;
+}
+
+#Top .menu-btn:hover,
+.kkutu-menu button:hover{
+  background: var(--tab-hover-bg, linear-gradient(135deg, #ff3366, #9933ff)) !important;
+  color: var(--tab-hover-fg, #fff) !important;
+}
+
+/* 선택됨(토글) 상태도 탭별 변수 사용 */
+.kkutu-menu .toggled{
+  background: var(--tab-active-bg, #444) !important;
+  color: var(--tab-active-fg, #fff) !important;
+}
+/* 2) 탭별 색 지정 예시 (ID가 있으면 ID로 지정) */
+#StartBtn{
+  --tab-bg: #1f8bff;
+  --tab-hover-bg: linear-gradient(135deg, #35a2ff, #6c63ff);
+  --tab-active-bg: #0f6cd1;
+}
+
+#ExitBtn{
+  --tab-bg: #ff4d4f;
+  --tab-hover-bg: linear-gradient(135deg, #ff6b6b, #ff3366);
+  --tab-active-bg: #d9363e;
+}
+
+/* ID가 없으면 순서로도 가능 */
+.kkutu-menu button:nth-child(1){ --tab-bg:#2a2f45; --tab-hover-bg:#3b4266; }
+.kkutu-menu button:nth-child(2){ --tab-bg:#245a3a; --tab-hover-bg:#2f7a4d; }
+.kkutu-menu button:nth-child(3){ --tab-bg:#6a3f1f; --tab-hover-bg:#8c542a; }
 
 
 # 기사 가져오는 엔진
